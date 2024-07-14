@@ -30,12 +30,13 @@ class Bar
 end
 ```
 and
-
+```
 Bar.new(message: "Hello World").call
-
+```
 will produce an output as:
-
+```
 called: Bar#initialize in COMPLETE_PATH_TO_YOUR_FILE/app/services/bar.rb:METHOD_LINE with params: {:message=>"Hello World"}
 called: Bar#call in COMPLETE_PATH_TO_YOUR_FILE/app/services/bar.rb:METHOD_LINE with params: {}
 called: Foo#puts_message in COMPLETE_PATH_TO_YOUR_FILE/app/services/foo:METHOD_LINE with params: {:message=>"Hello World"}
 
+```
