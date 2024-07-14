@@ -7,3 +7,35 @@ show only the methods defined in the application's own code.
 ## Usage in Rails
 
 To use this script in a Rails project, simply add it to an initializer. Create a file in `config/initializers`, for example `tracepoint_logger.rb`, and paste the code there.
+
+## Ouput
+Sample scenario and output:
+```
+module Foo
+  def puts_message(message)
+    puts message
+  end
+end
+
+class Bar
+  include Foo
+
+  def initialize(message:)
+    @message = message
+  end
+
+  def perform
+    puts_message(message)
+  end
+end
+```
+and
+
+Bar.new(message: "Hello World").call
+
+will produce an output as:
+
+called: Bar#initialize in COMPLETE_PATH_TO_YOUR_FILE/app/services/bar.rb:METHOD_LINE with params: {:message=>"Hello World"}
+called: Bar#call in COMPLETE_PATH_TO_YOUR_FILE/app/services/bar.rb:METHOD_LINE with params: {}
+called: Foo#puts_message in COMPLETE_PATH_TO_YOUR_FILE/app/services/foo:METHOD_LINE with params: {:message=>"Hello World"}
+
