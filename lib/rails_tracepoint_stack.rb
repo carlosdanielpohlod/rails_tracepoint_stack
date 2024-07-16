@@ -1,4 +1,3 @@
-
 $rails_tracer_rtps = nil
 
 class RailsTracepointStack
@@ -31,13 +30,17 @@ class RailsTracepointStack
   end
 
   def from_gempath_or_lib_path?(tp)
-    gem_paths.any? { |path| tp.path.start_with?(path) } || tp.path.start_with?(ruby_lib_path)
+    gem_paths.any? { |path| tp.path.start_with?(path) } || 
+    tp.path.start_with?(ruby_lib_path) || 
+    tp.path.include?("gems/bundler") 
   end
 end
 
-$rails_tracer_rtps = RailsTracepointStack.new.tracer
-$rails_tracer_rtps.enable
+if ENV.fetch('RAILS_TRACEPOINT_STACK', 'false') == 'true'
+  $rails_tracer_rtps = RailsTracepointStack.new.tracer
+  $rails_tracer_rtps.enable
 
-at_exit do
-  $rails_tracer_rtps.disable
+  at_exit do
+    $rails_tracer_rtps.disable
+  end
 end
