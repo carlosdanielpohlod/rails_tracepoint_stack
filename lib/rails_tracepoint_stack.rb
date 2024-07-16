@@ -7,7 +7,7 @@ trace = TracePoint.new(:call) do |tp|
   params = tp.binding.local_variables.map { |var|
     [var, tp.binding.local_variable_get(var)]
   }.to_h
-
+  
   puts "called: #{tp.defined_class}##{tp.method_id} in #{tp.path}:#{tp.lineno} with params: #{params}"
 end
 
