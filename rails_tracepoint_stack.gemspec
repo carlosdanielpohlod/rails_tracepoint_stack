@@ -7,6 +7,6 @@ Gem::Specification.new do |s|
   s.email       = "carlospohlod@gmail.com"
   s.files       = ["lib/rails_tracepoint_stack.rb"]
   s.homepage    =
-    "https://rubygems.org/gems/rails_tracepoint_stack"
+    "https://github.com/carlosdanielpohlod/rails_tracepoint_stack/"
   s.license       = "MIT"
 end
