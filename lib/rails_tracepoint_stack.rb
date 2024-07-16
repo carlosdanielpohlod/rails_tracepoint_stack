@@ -37,5 +37,5 @@ tracer = TracepointStack.new.tracer
 tracer.enable
 
 at_exit do
-  trace.disable
+  tracer.disable
 end
