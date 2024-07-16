@@ -1,9 +1,11 @@
 
-class TracepointStack
+$rails_tracer_rtps = nil
+
+class RailsTracepointStack
   def initialize
     @gem_paths = Bundler.load.specs.map(&:full_gem_path)
     @ruby_lib_path = RbConfig::CONFIG['rubylibdir']
-  end 
+  end
 
   def tracer
     @trace ||=  TracePoint.new(:call) do |tp|
@@ -33,9 +35,9 @@ class TracepointStack
   end
 end
 
-tracer = TracepointStack.new.tracer
-tracer.enable
+$rails_tracer_rtps = RailsTracepointStack.new.tracer
+$rails_tracer_rtps.enable
 
 at_exit do
-  tracer.disable
+  $rails_tracer_rtps.disable
 end
