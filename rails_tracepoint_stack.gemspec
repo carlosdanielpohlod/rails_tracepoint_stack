@@ -9,4 +9,5 @@ Gem::Specification.new do |s|
   s.homepage    = "https://github.com/carlosdanielpohlod/rails_tracepoint_stack/"
   s.license     = "MIT"
   s.metadata["documentation_uri"] = "https://github.com/carlosdanielpohlod/rails_tracepoint_stack/"
+  s.required_ruby_version = '>= 3.0'
 end
