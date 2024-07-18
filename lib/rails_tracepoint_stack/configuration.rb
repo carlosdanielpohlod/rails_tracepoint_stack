@@ -1,5 +1,5 @@
 module RailsTracepointStack
-  class Config
+  class Configuration
     attr_accessor :ignore_patterns
 
     def initialize

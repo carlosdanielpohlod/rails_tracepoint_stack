@@ -1,8 +1,16 @@
+require 'rails_tracepoint_stack/configuration'
+
 $rails_tracer_rtps = nil
 
 module RailsTracepointStack
-  class <<
-    
+  class << self
+    attr_accessor :configuration
+  end
+
+  def self.configure
+    self.configuration ||= RailsTracepointStack::Configuration.new
+    yield(configuration)
+  end
 end
 
 if ENV.fetch('RAILS_TRACEPOINT_STACK', 'false') == 'true'
