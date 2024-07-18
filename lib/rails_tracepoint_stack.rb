@@ -1,10 +1,11 @@
 require 'rails_tracepoint_stack/configuration'
+require 'rails_tracepoint_stack/tracer'
 
 $rails_tracer_rtps = nil
 
 module RailsTracepointStack
   class << self
-    attr_accessor :configuration
+    attr_accessor :configuration, :logger
   end
 
   def self.configure

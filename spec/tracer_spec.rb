@@ -1,7 +1,6 @@
 require 'spec_helper'
 require 'rails_tracepoint_stack'
 require 'rails_tracepoint_stack/tracer'
-require 'ostruct'
 
 class Foo
   def dummy_method
@@ -9,35 +8,44 @@ class Foo
   end
 end
 
-class IgnoredClass
-  def ignored_method
-    return
-  end
-end
-
 RSpec.describe RailsTracepointStack::Tracer do
-  before do
-    RailsTracepointStack.configuration do |config|
-      #TO DO: change it or both classes will be ignored
-      config.ignore_patterns = ['spec/tracer_spec.rb']
+  let(:tracer) { RailsTracepointStack::Tracer.new }
+
+  context "when the log not should be ignored" do
+    before do
+      allow(RailsTracepointStack::TraceFilter)
+        .to receive(:ignore_trace?)
+        .and_return(false)
+
+      allow(RailsTracepointStack::Logger).to receive(:log)
     end
-    @tracer = RailsTracepointStack::Tracer.new
-  end
 
-  it 'show methods outside the ignore patterns' do
-    expect {
-      @tracer.tracer.enable
+    it 'calls logger with correct log' do
+      tracer.tracer.enable do
         Foo.new.dummy_method
-      @tracer.tracer.disable
-    }.to output(/called: Foo#dummy_method/).to_stdout
+      end
+
+      expect(RailsTracepointStack::Logger)
+        .to have_received(:log)
+        .with(/called: Foo#dummy_method/)
+    end
   end
 
-  it 'not show ignored classess' do
-    expect {
-      @tracer.tracer.enable
+  context "when the log should be ignored" do
+    before do
+      allow(RailsTracepointStack::TraceFilter)
+        .to receive(:ignore_trace?)
+        .and_return(true)
 
-      IgnoredClass.new.ignored_method
-      @tracer.tracer.disable
-    }.not_to output(/called: IgnoredClass#ignored_method/).to_stdout
-  end
+      allow(RailsTracepointStack::Logger).to receive(:log)
+    end
+
+    it 'does not call logger' do
+      tracer.tracer.enable do
+        Foo.new.dummy_method
+      end
+
+      expect(RailsTracepointStack::Logger).not_to have_received(:log)
+    end
+  end 
 end
