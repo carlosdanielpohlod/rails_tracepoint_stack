@@ -1,22 +1,19 @@
-version
+# Changelog
 
-<b> 0.2.0 <b>
+## 0.2.0
 
-changes:
+**Changes:**
 
-- Add configuration of custom log patterns to be ignored
-- Add Rspec and Rake
+- Add configuration of custom log patterns to be ignored.
+- Add Rspec and Rake.
 
-version
+## 0.1.4
 
-<b> 0.1.4 <b>
+**Changes:**
 
-changes:
+- Ignore logs containing `gems/bundler`.
+- Require ruby >= 3.0.
 
-ignore logs containing `gems/bundler`
+**Breaking Changes:**
 
-require ruby >= 3.0
-
-breaking changes:
-
-to enable logs catch is necessary to set `RAILS_TRACEPOINT_STACK` as `true`
+- To enable logs catch, it is necessary to set `RAILS_TRACEPOINT_STACK` as `true`.
