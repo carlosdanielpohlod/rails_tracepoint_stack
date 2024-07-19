@@ -24,7 +24,7 @@ module RailsTracepointStack
   end
 end
 
-if ENV.fetch('RAILS_TRACEPOINT_STACK', 'false') == 'true'
+if ENV.fetch('RAILS_TRACEPOINT_STACK_ENABLED', 'false') == 'true'
   $rails_tracer_rtps = RailsTracepointStack::Tracer.new.tracer
   $rails_tracer_rtps.enable
 

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.1
+
+**Changes:**
+
+- Update the ENV enable to be more semantic
+- Add the VERSION constant module
+- Sorted the files inside of gemspec
+- Fix the depencies on the gemspec
+
 ## 0.2.0
 
 **Changes:**
