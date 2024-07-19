@@ -6,7 +6,7 @@ gem install rails_tracepoint_stack
 
 set env 
 ```bash
-RAILS_TRACEPOINT_STACK=true
+RAILS_TRACEPOINT_STACK_ENABLED=true
 ``` 
 if you wanna enable it globally on your Rails app
 
