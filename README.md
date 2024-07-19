@@ -88,7 +88,7 @@ You can also implement custom configuration for `RailsTracepointStack` by passin
 Complete example:
 
 ```ruby
-# config/rails_tracepoint_stack.rb
+# config/initializers/rails_tracepoint_stack.rb
 
 RailsTracepointStack.configure do |config|
   config.ignore_patterns << /services\/foo.rb/
