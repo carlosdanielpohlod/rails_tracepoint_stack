@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = "rails_tracepoint_stack"
-  s.version     = "0.2.0"
+  s.version     = RailsTracepointStack::VERSION
   s.summary     = "Get a complete stack trace for your code on a Rails application."
   s.description = "A formatted output of all methods called in your rails application of code created by the developer, with the complete path to the class/module, including passed params."
   s.authors     = ["Carlos Daniel Pohlod"]
@@ -10,6 +10,7 @@ Gem::Specification.new do |s|
     "lib/rails_tracepoint_stack/logger.rb", 
     "lib/rails_tracepoint_stack/tracer.rb", 
     "lib/rails_tracepoint_stack/trace_filter.rb",
+    "lib/rails_tracepoint_stack/version.rb",
     "lib/rails_tracepoint_stack/configuration.rb"
   ]
   s.homepage    = "https://github.com/carlosdanielpohlod/rails_tracepoint_stack/"
