@@ -8,7 +8,8 @@ module RailsTracepointStack
         next if RailsTracepointStack::TraceFilter.ignore_trace?(trace: tp)
 
         params = fetch_params(tp)
-        
+
+        # TODO: Add the support to custom format
         RailsTracepointStack::Logger.log "called: #{tp.defined_class}##{tp.method_id} in #{tp.path}:#{tp.lineno} with params: #{params}"
       end
     end
