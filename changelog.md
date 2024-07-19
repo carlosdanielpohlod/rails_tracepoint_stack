@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.1
+
+**Changes:**
+
+- Update the ENV enable to be more semantic
+- Add the VERSION constant module
+- Sorted the files inside of gemspec
+- Support to use Rails.env as default for the default log file
+
 ## 0.2.0
 
 **Changes:**
