@@ -3,6 +3,7 @@ require 'rails_tracepoint_stack/trace_filter'
 
 module RailsTracepointStack
   class Tracer
+    # TODO: Tracer.new shoud return the tracer. Is weird to call Tracer.new.tracer
     def tracer
       @trace ||= TracePoint.new(:call) do |tp|
         next if RailsTracepointStack::TraceFilter.ignore_trace?(trace: tp)
