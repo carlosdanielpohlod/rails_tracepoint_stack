@@ -4,8 +4,32 @@
 
 **Changes:**
 
-- Add configuration of custom log patterns to be ignored.
-- Add Rspec and Rake.
+- Refactor by separating Logger and Filter into their own classes.
+
+- Introduce `RailsTracepointStack.configure`, which allows ignoring traces with a custom pattern and customizing the logs output. Example:
+
+```ruby
+RailsTracepointStack.configure do |config|
+  config.ignore_patterns << /services\/foo.rb/
+  config.logger = YourLogger
+end
+```
+
+The default log destination is a file located on `log/rails_tracepoint_stack.log`
+
+- Add The possibility of enable the tracer locally, by calling:
+
+```ruby
+class Foo
+  def bar
+    RailsTracepointStack.enable_trace do
+      p "your code"
+    end
+  end
+end
+```
+
+- Add Rspec and Rake development dependencies, and add partial test coverage.
 
 ## 0.1.4
 
