@@ -12,6 +12,16 @@ module RailsTracepointStack
     self.configuration ||= RailsTracepointStack::Configuration.new
     yield(configuration)
   end
+
+  def self.enable_trace
+    raise ArgumentError, "Block not given to #enable_trace" unless block_given?
+
+    tracer = RailsTracepointStack::Tracer.new.tracer
+    tracer.enable
+    yield
+  ensure
+    tracer.disable
+  end
 end
 
 if ENV.fetch('RAILS_TRACEPOINT_STACK', 'false') == 'true'

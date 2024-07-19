@@ -15,8 +15,9 @@ Gem::Specification.new do |s|
   s.homepage    = "https://github.com/carlosdanielpohlod/rails_tracepoint_stack/"
   s.license     = "MIT"
   s.metadata["documentation_uri"] = "https://github.com/carlosdanielpohlod/rails_tracepoint_stack/"
-  s.required_ruby_version = '>= 3.0'
+  s.metadata["changelog_uri"] = "https://github.com/carlosdanielpohlod/rails_tracepoint_stack/blob/main/changelog.md"
 
-  s.add_development_dependency 'rspec', '>= 6.0'
-  s.add_development_dependency 'rake', '>= 12.0'
+  s.required_ruby_version = '>= 3.0'
+  s.add_development_dependency 'rspec', '~> 6.0', '>= 6.0.0'
+  s.add_development_dependency 'rake', '~> 12.0', '>= 12.0.0'
 end
