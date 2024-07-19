@@ -25,7 +25,7 @@ module RailsTracepointStack
     end
 
     def self.is_a_to_ignore_pattern?(trace)
-      RailsTracepointStack.configuration.ignore_patterns.any? { |pattern| trace.path.match?(pattern) }
+      RailsTracepointStack.configuration&.ignore_patterns&.any? { |pattern| trace.path.match?(pattern) }
     end
   end
 end

@@ -9,13 +9,14 @@ Gem::Specification.new do |s|
     "lib/rails_tracepoint_stack.rb", 
     "lib/rails_tracepoint_stack/logger.rb", 
     "lib/rails_tracepoint_stack/tracer.rb", 
-    "lib/rails_tracepoint_stack/trace_filter.rb"
+    "lib/rails_tracepoint_stack/trace_filter.rb",
+    "lib/rails_tracepoint_stack/configuration.rb"
   ]
   s.homepage    = "https://github.com/carlosdanielpohlod/rails_tracepoint_stack/"
   s.license     = "MIT"
   s.metadata["documentation_uri"] = "https://github.com/carlosdanielpohlod/rails_tracepoint_stack/"
   s.required_ruby_version = '>= 3.0'
 
-  s.add_development_dependency 'rspec'
-  s.add_development_dependency 'rake'
+  s.add_development_dependency 'rspec', '>= 6.0'
+  s.add_development_dependency 'rake', '>= 12.0'
 end
