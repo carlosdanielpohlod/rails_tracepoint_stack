@@ -6,12 +6,12 @@ Gem::Specification.new do |s|
   s.authors     = ["Carlos Daniel Pohlod"]
   s.email       = "carlospohlod@gmail.com"
   s.files       = [
-    "lib/rails_tracepoint_stack.rb", 
-    "lib/rails_tracepoint_stack/logger.rb", 
-    "lib/rails_tracepoint_stack/tracer.rb", 
+    "lib/rails_tracepoint_stack.rb",
+    "lib/rails_tracepoint_stack/configuration.rb",
+    "lib/rails_tracepoint_stack/logger.rb",
     "lib/rails_tracepoint_stack/trace_filter.rb",
-    "lib/rails_tracepoint_stack/version.rb",
-    "lib/rails_tracepoint_stack/configuration.rb"
+    "lib/rails_tracepoint_stack/tracer.rb",
+    "lib/rails_tracepoint_stack/version.rb"
   ]
   s.homepage    = "https://github.com/carlosdanielpohlod/rails_tracepoint_stack/"
   s.license     = "MIT"
