@@ -1,3 +1,5 @@
+require_relative "lib/rails_tracepoint_stack/version"
+
 Gem::Specification.new do |s|
   s.name        = "rails_tracepoint_stack"
   s.version     = RailsTracepointStack::VERSION
@@ -19,6 +21,6 @@ Gem::Specification.new do |s|
   s.metadata["changelog_uri"] = "https://github.com/carlosdanielpohlod/rails_tracepoint_stack/blob/main/changelog.md"
 
   s.required_ruby_version = '>= 3.0'
-  s.add_development_dependency 'rspec', '~> 6.0', '>= 6.0.0'
-  s.add_development_dependency 'rake', '~> 12.0', '>= 12.0.0'
+  s.add_development_dependency 'rspec', '~> 3.0', '>= 3.0.0'
+  s.add_development_dependency 'rake', '~> 13.0', '>= 13.0.0'
 end

@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rails_tracepoint_stack (0.2.2)
+    rails_tracepoint_stack (0.2.1)
 
 GEM
   remote: https://rubygems.org/
@@ -27,8 +27,8 @@ PLATFORMS
 
 DEPENDENCIES
   rails_tracepoint_stack!
-  rake
-  rspec
+  rake (~> 13.0, >= 13.0.0)
+  rspec (~> 3.0, >= 3.0.0)
 
 BUNDLED WITH
    2.4.17

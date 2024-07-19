@@ -8,6 +8,7 @@
 - Add the VERSION constant module
 - Sorted the files inside of gemspec
 - Support to use Rails.env as default for the default log file
+- Fix the depencies on the gemspec
 
 ## 0.2.0
 
