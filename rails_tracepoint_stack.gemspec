@@ -14,7 +14,10 @@ Gem::Specification.new do |s|
     "lib/rails_tracepoint_stack/logger.rb",
     "lib/rails_tracepoint_stack/trace_filter.rb",
     "lib/rails_tracepoint_stack/tracer.rb",
-    "lib/rails_tracepoint_stack/version.rb"
+    "lib/rails_tracepoint_stack/version.rb",
+    "lib/rails_tracepoint_stack/trace.rb",
+    "lib/rails_tracepoint_stack/filter/gem_path.rb",
+    "lib/rails_tracepoint_stack/filter/rb_config.rb"
   ]
   s.homepage    = "https://github.com/carlosdanielpohlod/rails_tracepoint_stack/"
   s.license     = "MIT"
