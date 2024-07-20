@@ -4,7 +4,11 @@ require 'rails_tracepoint_stack/filter/rb_config'
 module RailsTracepointStack
   class TraceFilter
     def self.ignore_trace?(trace:)
-      contains_to_ignore_strings?(trace) || from_gempath_or_lib_path?(trace) || is_a_to_ignore_pattern?(trace)
+      if defined_file_path_to_filter_patterns?
+        not_matches_file_path_to_filter_patterns?(trace)
+      else
+        contains_to_ignore_strings?(trace) || from_gempath_or_lib_path?(trace) || is_a_to_ignore_pattern?(trace)
+      end
     end
 
     private
@@ -41,6 +45,16 @@ module RailsTracepointStack
 
     def self.ruby_lib_path
       @ruby_lib_path ||= RailsTracepointStack::Filter::RbConfig.ruby_lib_path
+    end
+
+    def self.defined_file_path_to_filter_patterns?
+      RailsTracepointStack.configuration&.file_path_to_filter_patterns&.any?
+    end
+
+    def self.not_matches_file_path_to_filter_patterns?(trace)
+      !RailsTracepointStack.configuration.file_path_to_filter_patterns.any? do |pattern|
+        trace.file_path.match?(pattern)
+      end
     end
   end
 end
