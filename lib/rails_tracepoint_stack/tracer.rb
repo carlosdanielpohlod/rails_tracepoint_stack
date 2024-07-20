@@ -5,10 +5,11 @@ module RailsTracepointStack
   class Tracer
     # TODO: Tracer.new shoud return the tracer. Is weird to call Tracer.new.tracer
     def tracer
-      @trace ||= TracePoint.new(:call) do |tp|
-        next if RailsTracepointStack::TraceFilter.ignore_trace?(trace: tp)
+      @trace ||= TracePoint.new(:call) do |tracepoint|
+        next if RailsTracepointStack::TraceFilter.ignore_trace?(trace: tracepoint)
 
-        params = fetch_params(tp)
+        
+        trace = RailsTracepointStack::Trace.new(tracepoint: tracepoint)
 
         # TODO: Use proper OO
         message = RailsTracepointStack::LogFormatter.message tp, params
@@ -19,11 +20,6 @@ module RailsTracepointStack
     private
     attr_reader :gem_paths, :ruby_lib_path
 
-    # TODO: Extract this fetch from here
-    def fetch_params(tp)
-      tp.binding.local_variables.map do |var|
-        [var, tp.binding.local_variable_get(var)]
-      end.to_h
-    end
+    
   end
 end
