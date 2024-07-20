@@ -10,18 +10,20 @@ module RailsTracepointStack
 
         params = fetch_params(tp)
 
-        # TODO: Add the support to custom format
-        RailsTracepointStack::Logger.log "called: #{tp.defined_class}##{tp.method_id} in #{tp.path}:#{tp.lineno} with params: #{params}"
+        # TODO: Use proper OO
+        message = RailsTracepointStack::LogFormatter.message tp, params
+        RailsTracepointStack::Logger.log message
       end
     end
 
     private
     attr_reader :gem_paths, :ruby_lib_path
 
+    # TODO: Extract this fetch from here
     def fetch_params(tp)
-      tp.binding.local_variables.map { |var|
+      tp.binding.local_variables.map do |var|
         [var, tp.binding.local_variable_get(var)]
-      }.to_h
+      end.to_h
     end
   end
 end
