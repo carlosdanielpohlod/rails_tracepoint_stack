@@ -6,6 +6,10 @@ class Foo
   def dummy_method
     return
   end
+
+  def dummy_method_with_params(param_1, param_2)
+    return
+  end
 end
 
 RSpec.describe RailsTracepointStack::Tracer do
@@ -24,6 +28,8 @@ RSpec.describe RailsTracepointStack::Tracer do
     end
 
     it 'calls logger with correct log' do
+      allow_any_instance_of(RailsTracepointStack::Configuration).to receive(:log_format).and_return(:text)
+
       tracer.tracer.enable do
         Foo.new.dummy_method
       end
@@ -44,6 +50,19 @@ RSpec.describe RailsTracepointStack::Tracer do
       expect(RailsTracepointStack::Logger)
         .to have_received(:log)
         .with("{\"class\":\"Foo\",\"method_id\":\"dummy_method\",\"path\":\"/app/rails_tracepoint_stack/spec/tracer_spec.rb\",\"line\":6,\"params\":{}}")
+    end
+
+    # TODO: Extract this test to a proper place
+    it 'calls logger with correct log with json log format' do
+      allow_any_instance_of(RailsTracepointStack::Configuration).to receive(:log_format).and_return(:json)
+
+      tracer.tracer.enable do
+        Foo.new.dummy_method_with_params("param_1_value", "param_2_value")
+      end
+
+      expect(RailsTracepointStack::Logger)
+        .to have_received(:log)
+        .with("{\"class\":\"Foo\",\"method_id\":\"dummy_method_with_params\",\"path\":\"/app/rails_tracepoint_stack/spec/tracer_spec.rb\",\"line\":6,\"params\":{\"param_1\":\"param_1_value\",\"param_2\":\"param_2_value\"}}")
     end
   end
 
