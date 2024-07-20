@@ -1,5 +1,5 @@
 require 'spec_helper'
-require_relative '../lib/rails_tracepoint_stack/trace.rb'  # Ajuste o caminho conforme necessário
+require_relative '../lib/rails_tracepoint_stack/trace.rb' 
 
 RSpec.describe RailsTracepointStack::Trace do
   let(:trace_point_double) do
