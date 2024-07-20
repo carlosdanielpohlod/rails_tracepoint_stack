@@ -4,7 +4,7 @@ module RailsTracepointStack
   class Trace
     extend Forwardable
 
-    attr_reader :params
+    attr_reader :params, :trace_point
 
     def_delegator :@trace_point, :defined_class, :class_name
     def_delegator :@trace_point, :method_id, :method_name
@@ -13,12 +13,12 @@ module RailsTracepointStack
 
     def initialize(trace_point:)
       @trace_point = trace_point
-     
     end
 
     def params
       @params ||= fetch_params(trace_point)
     end
+
     private
 
     def fetch_params(trace_point)

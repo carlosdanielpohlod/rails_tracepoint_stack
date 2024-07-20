@@ -1,26 +1,26 @@
 module RailsTracepointStack
   module LogFormatter
-    def self.message(tp, params)
+    def self.message(trace)
       case RailsTracepointStack.configuration&.log_format
       when :json
-        json tp, params
+        json trace
       else
-        text tp, params
+        text trace
       end
     end
 
-    def self.text(tp, params)
-      "called: #{tp.defined_class}##{tp.method_id} in #{tp.path}:#{tp.lineno} with params: #{params}"
+    def self.text(trace)
+      "called: #{trace.class_name}##{trace.method_name} in #{trace.file_path}:#{trace.line_number} with params: #{trace.params}"
     end
 
-    def self.json(tp, params)
+    def self.json(trace)
       {
-        class: tp.defined_class,
-        method_id: tp.method_id,
-        path: tp.path,
-        line: tp.lineno,
-        params: params
-        }.to_json
+        class: trace.class_name,
+        method_name: trace.method_name,
+        path: trace.file_path,
+        line: trace.line_number,
+        params: trace.params
+      }.to_json
     end
   end
 end
