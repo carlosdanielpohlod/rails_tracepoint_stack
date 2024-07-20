@@ -10,6 +10,7 @@ Gem::Specification.new do |s|
   s.files       = [
     "lib/rails_tracepoint_stack.rb",
     "lib/rails_tracepoint_stack/configuration.rb",
+    "lib/rails_tracepoint_stack/log_formatter.rb",
     "lib/rails_tracepoint_stack/logger.rb",
     "lib/rails_tracepoint_stack/trace_filter.rb",
     "lib/rails_tracepoint_stack/tracer.rb",

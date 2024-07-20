@@ -1,4 +1,6 @@
+require 'json'
 require 'rails_tracepoint_stack/configuration'
+require 'rails_tracepoint_stack/log_formatter'
 require 'rails_tracepoint_stack/tracer'
 
 $rails_tracer_rtps = nil

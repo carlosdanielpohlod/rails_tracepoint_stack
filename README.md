@@ -84,6 +84,7 @@ You can also implement custom configuration for `RailsTracepointStack` by passin
 |-------------------|-----------------------------------------------------------------------------------------------|
 | `ignore_patterns` | Pass a regex pattern to filter (ignore) matched traces. Example: `/services\/foo.rb/`         |
 | `logger`          | Pass your custom logger. Example: `Rails.logger`. If not used, logs are saved in `log/rails_tracepoint_stack.log`. |
+| `log_format`      | Inform what kind of format you wanna to use, text (default), of json                          |
 
 Complete example:
 
@@ -93,4 +94,5 @@ Complete example:
 RailsTracepointStack.configure do |config|
   config.ignore_patterns << /services\/foo.rb/
   config.logger = YourLogger
+  config.log_format = :text
 end

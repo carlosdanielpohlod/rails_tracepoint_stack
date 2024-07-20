@@ -8,6 +8,7 @@
 - Add the VERSION constant module
 - Sorted the files inside of gemspec
 - Fix the depencies on the gemspec
+- Add the "log_format" configuration support for text and json formats
 
 ## 0.2.0
 
