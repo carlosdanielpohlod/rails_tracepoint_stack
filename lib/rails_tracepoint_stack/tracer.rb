@@ -1,29 +1,22 @@
+#TODO: Move to a loader file
 require 'rails_tracepoint_stack/logger'
 require 'rails_tracepoint_stack/trace_filter'
+require 'rails_tracepoint_stack/trace'
+require 'rails_tracepoint_stack/log_formatter'
 
 module RailsTracepointStack
   class Tracer
     # TODO: Tracer.new shoud return the tracer. Is weird to call Tracer.new.tracer
     def tracer
-      @trace ||= TracePoint.new(:call) do |tp|
-        next if RailsTracepointStack::TraceFilter.ignore_trace?(trace: tp)
+      @tracer ||= TracePoint.new(:call) do |tracepoint|
+        trace = RailsTracepointStack::Trace.new(trace_point: tracepoint)
 
-        params = fetch_params(tp)
+        next if RailsTracepointStack::TraceFilter.ignore_trace?(trace: trace)
 
         # TODO: Use proper OO
-        message = RailsTracepointStack::LogFormatter.message tp, params
-        RailsTracepointStack::Logger.log message
+        message = RailsTracepointStack::LogFormatter.message trace
+        RailsTracepointStack::Logger.log message 
       end
-    end
-
-    private
-    attr_reader :gem_paths, :ruby_lib_path
-
-    # TODO: Extract this fetch from here
-    def fetch_params(tp)
-      tp.binding.local_variables.map do |var|
-        [var, tp.binding.local_variable_get(var)]
-      end.to_h
     end
   end
 end

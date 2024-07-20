@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.0
+
+**Changes:**
+
+- Refactor classes, formatting a trace using a value object class `RailsTracepointStack::Trace`
+- include configuration `log_format` option, allowing choose an output as `text` or `json`
+- Include configuration `file_path_to_filter_patterns`, allowing filter traces only when the origin file path matches a pattern
+- Improve test coverage
+
 ## 0.2.1
 
 **Changes:**
