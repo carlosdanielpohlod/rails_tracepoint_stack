@@ -1,6 +1,4 @@
-# le todos os arquivos da pasta lib e seus subdiretorios
 Dir[File.join(File.dirname(__FILE__), '../lib/**/*.rb')].sort.each { |file| require file }
-# require 'rails_tracepoint_stack'
 
 def initialize_gem_configuration!
   RailsTracepointStack.configuration = RailsTracepointStack::Configuration.new
