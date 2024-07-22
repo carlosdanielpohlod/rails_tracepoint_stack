@@ -82,10 +82,11 @@ You can also implement custom configuration for `RailsTracepointStack` by passin
 
 | Configuration                  | Description                                                                                   |
 |--------------------------------|-----------------------------------------------------------------------------------------------|
-| `ignore_patterns`              | Pass a regex pattern to filter (ignore) matched traces. Example: `/services\/foo.rb/`         |
-| `logger`                       | Pass your custom logger. Example: `Rails.logger`. If not used, logs are saved in `log/rails_tracepoint_stack.log`. |
-| `log_format`                   | Inform what kind of format you wanna to use, text (default), or json                          |
 | `file_path_to_filter_patterns` | Include configuration allowing filter traces only when the origin file path matches a pattern, Example: `/services\/foo.rb/`          |
+| `ignore_patterns`              | Pass a regex pattern to filter (ignore) matched traces. Example: `/services\/foo.rb/`         |
+| `log_format`                   | Inform what kind of format you wanna to use, text (default), or json                          |
+| `log_external_sources`         | Log the external sources to the file, like libraries, gems and bundler                        |
+| `logger`                       | Pass your custom logger. Example: `Rails.logger`. If not used, logs are saved in `log/rails_tracepoint_stack.log`. |
 
 Complete example:
 
@@ -93,8 +94,9 @@ Complete example:
 # config/initializers/rails_tracepoint_stack.rb
 
 RailsTracepointStack.configure do |config|
-  config.ignore_patterns << /services\/foo.rb/
   config.file_path_to_filter_patterns << /services\/foo.rb/
-  config.logger = YourLogger
+  config.ignore_patterns << /services\/foo.rb/
   config.log_format = :text
+  config.log_external_sources = false
+  config.logger = YourLogger
 end

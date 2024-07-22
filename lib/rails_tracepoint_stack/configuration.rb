@@ -1,12 +1,17 @@
 module RailsTracepointStack
   class Configuration
-    attr_accessor :ignore_patterns, :logger, :log_format, :file_path_to_filter_patterns
+    attr_accessor :file_path_to_filter_patterns,
+      :ignore_patterns,
+      :log_format,
+      :log_external_sources,
+      :logger,
 
     def initialize
-      @ignore_patterns = []
       @file_path_to_filter_patterns = []
-      @logger = nil
+      @ignore_patterns = []
       @log_format = :text
+      @log_external_sources = false
+      @logger = nil
     end
   end
 end

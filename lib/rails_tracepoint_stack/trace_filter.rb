@@ -18,9 +18,12 @@ module RailsTracepointStack
     end
 
     def self.from_gempath_or_lib_path?(trace)
-      file_path_starts_with_gem_path?(trace) || 
-      file_path_starts_with_ruby_lib_path?(trace) || 
-      file_path_starts_with_bundler_path?(trace)
+      !RailsTracepointStack.configuration&.log_external_sources &&
+      (
+        file_path_starts_with_gem_path?(trace) ||
+        file_path_starts_with_ruby_lib_path?(trace) ||
+        file_path_starts_with_bundler_path?(trace)
+      )
     end
 
     def self.is_a_to_ignore_pattern?(trace)
