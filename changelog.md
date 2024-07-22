@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.1
+
+**Changes:**
+
+- Add the ability to include the external sources to the log using `config.log_external_sources = true`
+
 ## 0.3.0
 
 **Changes:**
