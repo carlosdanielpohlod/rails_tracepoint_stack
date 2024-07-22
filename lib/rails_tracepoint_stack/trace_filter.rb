@@ -1,6 +1,3 @@
-require 'rails_tracepoint_stack/filter/gem_path'
-require 'rails_tracepoint_stack/filter/rb_config'
-
 module RailsTracepointStack
   class TraceFilter
     def self.ignore_trace?(trace:)
@@ -18,6 +15,7 @@ module RailsTracepointStack
     end
 
     def self.from_gempath_or_lib_path?(trace)
+
       !RailsTracepointStack.configuration&.log_external_sources &&
       (
         file_path_starts_with_gem_path?(trace) ||
@@ -31,7 +29,7 @@ module RailsTracepointStack
     end
 
     def self.file_path_starts_with_gem_path?(trace)
-     gem_paths.any? { |path| trace.file_path.start_with?(path) }
+      gem_paths.any? { |path| trace.file_path.start_with?(path) }
     end
 
     def self.file_path_starts_with_ruby_lib_path?(trace)
