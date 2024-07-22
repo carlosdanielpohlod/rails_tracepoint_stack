@@ -1,5 +1,4 @@
 require 'spec_helper'
-require_relative '../lib/rails_tracepoint_stack/trace.rb' 
 
 RSpec.describe RailsTracepointStack::Trace do
   let(:trace_point_double) do
@@ -7,10 +6,16 @@ RSpec.describe RailsTracepointStack::Trace do
                     defined_class: "MyClass", 
                     method_id: :my_method, 
                     path: "/path/to/file.rb", 
-                    lineno: 42)
+                    lineno: 42,
+                    binding: instance_double(
+                      "Binding",
+                      local_variables: ['var'],
+                      local_variable_get: 'value'
+                    )
+                  )
   end
-  let(:params) { { key: 'value' } }
-  subject(:trace) { described_class.new(trace_point: trace_point_double, params: params) }
+  let(:params) { { 'var' => 'value' } }
+  subject(:trace) { described_class.new(trace_point: trace_point_double) }
 
   describe '#initialize' do
     it 'initializes with trace_point and params' do

@@ -1,8 +1,4 @@
-require 'rails_tracepoint_stack'
-require 'rails_tracepoint_stack/trace_filter'
-require 'rails_tracepoint_stack/trace'
-require 'rspec'
-require 'bundler'
+require 'spec_helper'
 require 'ostruct'
 
 RSpec.describe RailsTracepointStack::TraceFilter do
