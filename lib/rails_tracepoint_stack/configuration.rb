@@ -4,7 +4,7 @@ module RailsTracepointStack
       :ignore_patterns,
       :log_format,
       :log_external_sources,
-      :logger,
+      :logger
 
     def initialize
       @file_path_to_filter_patterns = []

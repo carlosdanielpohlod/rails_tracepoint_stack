@@ -1,7 +1,5 @@
 require 'spec_helper'
-require 'rails_tracepoint_stack'
-require 'rails_tracepoint_stack/tracer'
-require 'rails_tracepoint_stack/trace'
+
 class Foo
   def dummy_method
     return

@@ -1,6 +1,5 @@
-require 'rails_tracepoint_stack/log_formatter'
+require 'spec_helper'
 require 'json'
-require 'rails_tracepoint_stack/trace'
 
 RSpec.describe RailsTracepointStack::LogFormatter do
   let(:trace_double) do

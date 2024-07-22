@@ -1,5 +1,4 @@
-require 'rails_tracepoint_stack/logger'
-require 'rails_tracepoint_stack'
+require 'spec_helper'
 require 'fileutils'
 
 RSpec.describe RailsTracepointStack::Logger do

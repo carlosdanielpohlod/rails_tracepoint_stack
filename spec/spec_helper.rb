@@ -1,4 +1,8 @@
-$LOAD_PATH.unshift File.expand_path("../lib", __dir__)
+Dir[File.join(File.dirname(__FILE__), '../lib/**/*.rb')].sort.each { |file| require file }
+
+def initialize_gem_configuration!
+  RailsTracepointStack.configuration = RailsTracepointStack::Configuration.new
+end
 
 RSpec.configure do |config|
   config.order = :random
