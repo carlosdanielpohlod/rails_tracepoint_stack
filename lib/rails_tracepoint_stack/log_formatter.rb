@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RailsTracepointStack
   module LogFormatter
     def self.message(trace)

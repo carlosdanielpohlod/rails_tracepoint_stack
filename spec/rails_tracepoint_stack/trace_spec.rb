@@ -1,18 +1,19 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 RSpec.describe RailsTracepointStack::Trace do
   let(:trace_point_double) do
-    instance_double("TracePoint", 
-                    defined_class: "MyClass", 
-                    method_id: :my_method, 
-                    path: "/path/to/file.rb", 
+    instance_double('TracePoint',
+                    defined_class: 'MyClass',
+                    method_id: :my_method,
+                    path: '/path/to/file.rb',
                     lineno: 42,
                     binding: instance_double(
-                      "Binding",
+                      'Binding',
                       local_variables: ['var'],
                       local_variable_get: 'value'
-                    )
-                  )
+                    ))
   end
   let(:params) { { 'var' => 'value' } }
   subject(:trace) { described_class.new(trace_point: trace_point_double) }
@@ -25,7 +26,7 @@ RSpec.describe RailsTracepointStack::Trace do
 
   describe 'delegated methods' do
     it 'returns the class name' do
-      expect(trace.class_name).to eq("MyClass")
+      expect(trace.class_name).to eq('MyClass')
     end
 
     it 'returns the method name' do
@@ -33,7 +34,7 @@ RSpec.describe RailsTracepointStack::Trace do
     end
 
     it 'returns the file path' do
-      expect(trace.file_path).to eq("/path/to/file.rb")
+      expect(trace.file_path).to eq('/path/to/file.rb')
     end
 
     it 'returns the line number' do

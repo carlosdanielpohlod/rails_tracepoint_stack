@@ -1,4 +1,6 @@
-#TODO: Move to a loader file
+# frozen_string_literal: true
+
+# TODO: Move to a loader file
 require 'rails_tracepoint_stack/logger'
 require 'rails_tracepoint_stack/trace_filter'
 require 'rails_tracepoint_stack/trace'
@@ -15,7 +17,7 @@ module RailsTracepointStack
 
         # TODO: Use proper OO
         message = RailsTracepointStack::LogFormatter.message trace
-        RailsTracepointStack::Logger.log message 
+        RailsTracepointStack::Logger.log message
       end
     end
   end

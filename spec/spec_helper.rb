@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 Dir[File.join(File.dirname(__FILE__), '../lib/**/*.rb')].sort.each { |file| require file }
 
 def initialize_gem_configuration!

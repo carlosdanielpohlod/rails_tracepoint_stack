@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'forwardable'
 
 module RailsTracepointStack
@@ -22,9 +24,9 @@ module RailsTracepointStack
     private
 
     def fetch_params(trace_point)
-      trace_point.binding.local_variables.map { |var|
+      trace_point.binding.local_variables.map do |var|
         [var, trace_point.binding.local_variable_get(var)]
-      }.to_h
+      end.to_h
     end
   end
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 require 'ostruct'
 
@@ -17,7 +19,7 @@ RSpec.describe RailsTracepointStack::TraceFilter do
         .and_return('/path/to/ruby/lib')
     end
 
-    let(:internal_trace) do 
+    let(:internal_trace) do
       instance_double(RailsTracepointStack::Trace, file_path: '<internal:kernel>')
     end
 
@@ -35,15 +37,15 @@ RSpec.describe RailsTracepointStack::TraceFilter do
       allow(RailsTracepointStack::Filter::GemPath)
         .to receive(:full_gem_path)
         .and_return([])
-      
+
       allow(RailsTracepointStack::Filter::RbConfig)
         .to receive(:ruby_lib_path)
         .and_return('/path/to/ruby/lib')
     end
 
-    let(:pattern_trace) do 
+    let(:pattern_trace) do
       instance_double(
-        RailsTracepointStack::Trace, 
+        RailsTracepointStack::Trace,
         file_path: 'some_path/ignore_pattern/some_file.rb'
       )
     end
@@ -56,9 +58,8 @@ RSpec.describe RailsTracepointStack::TraceFilter do
   ## Flaky test, this one fails when running all tests, but works when running only this test
   context 'when trace is from a gem path' do
     let(:gem_path_trace) do
-      instance_double(RailsTracepointStack::Trace, 
-        file_path: '/path/to/gem/some_file.rb'
-      )
+      instance_double(RailsTracepointStack::Trace,
+                      file_path: '/path/to/gem/some_file.rb')
     end
 
     before do
@@ -75,21 +76,21 @@ RSpec.describe RailsTracepointStack::TraceFilter do
       expect(described_class.ignore_trace?(trace: gem_path_trace)).to be true
     end
   end
-  
+
   context 'when trace does not meet any ignore criteria' do
     before do
       allow(RailsTracepointStack::Filter::GemPath)
         .to receive(:full_gem_path)
         .and_return([])
-      
+
       allow(RailsTracepointStack::Filter::RbConfig)
         .to receive(:ruby_lib_path)
         .and_return('/path/to/ruby/lib')
     end
 
-    let(:normal_trace) do 
-      instance_double(RailsTracepointStack::Trace, 
-      file_path: 'some_path/some_file.rb')
+    let(:normal_trace) do
+      instance_double(RailsTracepointStack::Trace,
+                      file_path: 'some_path/some_file.rb')
     end
 
     it 'does not ignore the trace' do
@@ -97,12 +98,10 @@ RSpec.describe RailsTracepointStack::TraceFilter do
     end
   end
 
-  
-
   context 'when trace is from a ruby lib path' do
     let(:ruby_lib_trace) do
-      instance_double(RailsTracepointStack::Trace, 
-      file_path: '/path/to/ruby/lib/some_file.rb')
+      instance_double(RailsTracepointStack::Trace,
+                      file_path: '/path/to/ruby/lib/some_file.rb')
     end
 
     before do
@@ -120,8 +119,8 @@ RSpec.describe RailsTracepointStack::TraceFilter do
     end
   end
 
-  context "when defined file path to filter patterns" do
-    context "and trace not matches" do
+  context 'when defined file path to filter patterns' do
+    context 'and trace not matches' do
       before do
         RailsTracepointStack.configure do |config|
           config.file_path_to_filter_patterns << /ignore_pattern/
@@ -136,9 +135,9 @@ RSpec.describe RailsTracepointStack::TraceFilter do
           .and_return('/path/to/ruby/lib')
       end
 
-      let(:pattern_trace) do 
+      let(:pattern_trace) do
         instance_double(
-          RailsTracepointStack::Trace, 
+          RailsTracepointStack::Trace,
           file_path: 'some_path/ignore_pattern/some_file.rb'
         )
       end
@@ -148,7 +147,7 @@ RSpec.describe RailsTracepointStack::TraceFilter do
       end
     end
 
-    context "and trace matches" do
+    context 'and trace matches' do
       before do
         RailsTracepointStack.configure do |config|
           config.file_path_to_filter_patterns << /ignore_pattern/
@@ -163,9 +162,9 @@ RSpec.describe RailsTracepointStack::TraceFilter do
           .and_return('/path/to/ruby/lib')
       end
 
-      let(:pattern_trace) do 
+      let(:pattern_trace) do
         instance_double(
-          RailsTracepointStack::Trace, 
+          RailsTracepointStack::Trace,
           file_path: 'some_path/some_file.rb'
         )
       end

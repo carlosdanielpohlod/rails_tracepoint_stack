@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'json'
 require 'rails_tracepoint_stack/configuration'
 require 'rails_tracepoint_stack/log_formatter'
@@ -16,7 +18,7 @@ module RailsTracepointStack
   end
 
   def self.enable_trace
-    raise ArgumentError, "Block not given to #enable_trace" unless block_given?
+    raise ArgumentError, 'Block not given to #enable_trace' unless block_given?
 
     tracer = RailsTracepointStack::Tracer.new.tracer
     tracer.enable
