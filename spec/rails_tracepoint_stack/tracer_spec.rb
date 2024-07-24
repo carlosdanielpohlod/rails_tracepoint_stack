@@ -1,12 +1,12 @@
-require 'spec_helper'
+require "spec_helper"
 
 class Foo
   def dummy_method
-    return
+    nil
   end
 
   def dummy_method_with_params(param_1, param_2)
-    return
+    nil
   end
 end
 
@@ -17,11 +17,11 @@ RSpec.describe RailsTracepointStack::Tracer do
     before do
       allow(RailsTracepointStack::Filter::GemPath)
         .to receive(:full_gem_path)
-        .and_return(['/another/path/to/gem'])
+        .and_return(["/another/path/to/gem"])
 
       allow(RailsTracepointStack::Filter::RbConfig)
         .to receive(:ruby_lib_path)
-        .and_return('/path/to/ruby/lib')
+        .and_return("/path/to/ruby/lib")
 
       allow(RailsTracepointStack::Logger).to receive(:log)
 
@@ -43,7 +43,7 @@ RSpec.describe RailsTracepointStack::Tracer do
         end
       end
 
-      it 'calls logger with correct log' do
+      it "calls logger with correct log" do
         tracer.tracer.enable do
           Foo.new.dummy_method
         end
@@ -61,7 +61,7 @@ RSpec.describe RailsTracepointStack::Tracer do
         end
       end
       # TODO: Extract this test to a proper place
-      it 'calls logger with correct log with json log format' do
+      it "calls logger with correct log with json log format" do
         allow_any_instance_of(RailsTracepointStack::Configuration)
           .to receive(:log_format)
           .and_return(:json)
@@ -74,9 +74,9 @@ RSpec.describe RailsTracepointStack::Tracer do
           .to have_received(:log)
           .with("{\"class\":\"Foo\",\"method_name\":\"dummy_method\",\"path\":\"/app/rails_tracepoint_stack/spec/tracer_spec.rb\",\"line\":6,\"params\":{}}")
       end
-     
+
       # TODO: Extract this test to a proper place
-      it 'calls logger with correct log with json log format' do
+      it "calls logger with correct log with json log format" do
         allow_any_instance_of(RailsTracepointStack::Configuration).to receive(:log_format).and_return(:json)
 
         tracer.tracer.enable do
@@ -99,12 +99,12 @@ RSpec.describe RailsTracepointStack::Tracer do
       allow(RailsTracepointStack::Logger).to receive(:log)
     end
 
-    it 'does not call logger' do
+    it "does not call logger" do
       tracer.tracer.enable do
         Foo.new.dummy_method
       end
 
       expect(RailsTracepointStack::Logger).not_to have_received(:log)
     end
-  end 
+  end
 end

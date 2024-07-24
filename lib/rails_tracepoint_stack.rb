@@ -1,7 +1,7 @@
-require 'json'
-require 'rails_tracepoint_stack/configuration'
-require 'rails_tracepoint_stack/log_formatter'
-require 'rails_tracepoint_stack/tracer'
+require "json"
+require "rails_tracepoint_stack/configuration"
+require "rails_tracepoint_stack/log_formatter"
+require "rails_tracepoint_stack/tracer"
 
 $rails_tracer_rtps = nil
 
@@ -26,7 +26,7 @@ module RailsTracepointStack
   end
 end
 
-if ENV.fetch('RAILS_TRACEPOINT_STACK_ENABLED', 'false') == 'true'
+if ENV.fetch("RAILS_TRACEPOINT_STACK_ENABLED", "false") == "true"
   $rails_tracer_rtps = RailsTracepointStack::Tracer.new.tracer
   $rails_tracer_rtps.enable
 
