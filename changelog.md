@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.3
+
+**Changes**
+
+- Add autoload of all lib files on test_helper
+- Fix some tests
+
+**BugFix**
+
+- Fixed the Configuration module not loading the default value for the configuration attributes
+
 ## 0.3.1
 
 **Changes:**
