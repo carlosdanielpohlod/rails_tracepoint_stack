@@ -2,11 +2,7 @@ module RailsTracepointStack
   module Filter
     class CustomTraceSelectorFilter
       def self.ignore_trace?(trace:)
-        unless filter_match_a_custom_pattern?
-          return false
-        else
-          return true
-        end
+        !filter_match_a_custom_pattern?
       end
 
       private
