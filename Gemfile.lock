@@ -46,8 +46,6 @@ GEM
       unicode-display_width (>= 2.4.0, < 3.0)
     rubocop-ast (1.31.3)
       parser (>= 3.3.1.0)
-    rubocop-rspec (3.0.3)
-      rubocop (~> 1.61)
     ruby-progressbar (1.13.0)
     strscan (3.1.0)
     unicode-display_width (2.5.0)
@@ -60,8 +58,7 @@ DEPENDENCIES
   rails_tracepoint_stack!
   rake (~> 13.0, >= 13.0.0)
   rspec (~> 3.0, >= 3.0.0)
-  rubocop (~> 1.65)
-  rubocop-rspec (~> 3.0)
+  rubocop (~> 1.65, >= 1.65.0)
 
 BUNDLED WITH
    2.5.16
