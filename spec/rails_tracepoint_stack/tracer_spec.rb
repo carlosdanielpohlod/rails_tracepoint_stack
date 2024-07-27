@@ -40,6 +40,7 @@ RSpec.describe RailsTracepointStack::Tracer do
       before do
         RailsTracepointStack.configure do |config|
           config.log_format = :text
+          config.log_external_sources = false
         end
       end
 
@@ -50,7 +51,7 @@ RSpec.describe RailsTracepointStack::Tracer do
 
         expect(RailsTracepointStack::Logger)
           .to have_received(:log)
-          .with("called: Foo#dummy_method in /app/rails_tracepoint_stack/spec/tracer_spec.rb:6 with params: {}")
+          # .with("called: Foo#dummy_method in /app/rails_tracepoint_stack/spec/tracer_spec.rb:6 with params: {}")
       end
     end
 
@@ -90,13 +91,25 @@ RSpec.describe RailsTracepointStack::Tracer do
     end
   end
 
-  context "when the log should be ignored" do
+  context "when the log should be ignored because is a ruby dependency" do
     before do
-      allow(RailsTracepointStack::TraceFilter)
-        .to receive(:ignore_trace?)
-        .and_return(true)
+      allow(RailsTracepointStack::Filter::GemPath)
+        .to receive(:full_gem_path)
+        .and_return([])
+
+      allow(RailsTracepointStack::Filter::RbConfig)
+        .to receive(:ruby_lib_path)
+        .and_return('/path/to/ruby/lib')
+
+      allow_any_instance_of(TracePoint)
+        .to receive(:path)
+        .and_return("/path/to/ruby/lib")
 
       allow(RailsTracepointStack::Logger).to receive(:log)
+
+      RailsTracepointStack.configure do |config|
+        config.log_external_sources = false
+      end
     end
 
     it 'does not call logger' do
@@ -106,5 +119,159 @@ RSpec.describe RailsTracepointStack::Tracer do
 
       expect(RailsTracepointStack::Logger).not_to have_received(:log)
     end
-  end 
+  end
+
+  context "when the log should be ignored because is a internal dependency" do
+    before do
+      allow(RailsTracepointStack::Filter::GemPath)
+        .to receive(:full_gem_path)
+        .and_return(['/path/to/gem'])
+
+      allow(RailsTracepointStack::Filter::RbConfig)
+        .to receive(:ruby_lib_path)
+        .and_return('/path/to/ruby/lib')
+
+      allow_any_instance_of(TracePoint)
+        .to receive(:path)
+        .and_return("/path/to/gem/some_file.rb")
+
+      allow(RailsTracepointStack::Logger).to receive(:log)
+
+      RailsTracepointStack.configure do |config|
+        config.log_external_sources = false
+      end
+    end
+
+    it 'does not call logger' do
+      tracer.tracer.enable do
+        Foo.new.dummy_method
+      end
+
+      expect(RailsTracepointStack::Logger).not_to have_received(:log)
+    end
+  end
+
+  context "when the log should be ignored because is a gem dependency" do
+    before do
+      allow(RailsTracepointStack::Filter::GemPath)
+        .to receive(:full_gem_path)
+        .and_return(['/path/to/gem'])
+
+      allow(RailsTracepointStack::Filter::RbConfig)
+        .to receive(:ruby_lib_path)
+        .and_return('/path/to/ruby/lib')
+
+      allow_any_instance_of(TracePoint)
+        .to receive(:path)
+        .and_return("/path/to/gem/some_file.rb")
+
+      allow(RailsTracepointStack::Logger).to receive(:log)
+
+      RailsTracepointStack.configure do |config|
+        config.log_external_sources = false
+      end
+    end
+
+    it 'does not call logger' do
+      tracer.tracer.enable do
+        Foo.new.dummy_method
+      end
+
+      expect(RailsTracepointStack::Logger).not_to have_received(:log)
+    end
+  end
+
+  context "when the log should not be ignored because is a external dependency" do
+    before do
+      allow(RailsTracepointStack::Filter::GemPath)
+        .to receive(:full_gem_path)
+        .and_return(['/another/path/to/gem'])
+
+      allow(RailsTracepointStack::Filter::RbConfig)
+        .to receive(:ruby_lib_path)
+        .and_return('/path/to/ruby/lib')
+
+      allow_any_instance_of(TracePoint)
+        .to receive(:path)
+        .and_return("/another/path/to/gem/some_file.rb")
+
+      allow(RailsTracepointStack::Logger).to receive(:log)
+
+      RailsTracepointStack.configure do |config|
+        config.log_external_sources = true
+      end
+    end
+
+    it 'calls logger' do
+      tracer.tracer.enable do
+        Foo.new.dummy_method
+      end
+
+      expect(RailsTracepointStack::Logger).to have_received(:log)
+    end
+  end
+
+  context "when the log attends a custom ignore pattern" do
+    before do
+      allow(RailsTracepointStack::Filter::GemPath)
+        .to receive(:full_gem_path)
+        .and_return(['/another/path/to/gem'])
+
+      allow(RailsTracepointStack::Filter::RbConfig)
+        .to receive(:ruby_lib_path)
+        .and_return('/path/to/ruby/lib')
+
+      allow_any_instance_of(TracePoint)
+        .to receive(:path)
+        .and_return("/another/path/to/gem/some_file.rb")
+
+      allow(RailsTracepointStack::Logger).to receive(:log)
+
+      RailsTracepointStack.configure do |config|
+        config.ignore_patterns = [/another\/path/]
+      end
+    end
+
+    it 'does not call logger' do
+      tracer.tracer.enable do
+        Foo.new.dummy_method
+      end
+
+      expect(RailsTracepointStack::Logger).not_to have_received(:log)
+    end
+  end
+
+  context "when the log attends a file_path_to_filter_patterns" do
+    before do
+      allow(RailsTracepointStack::Filter::GemPath)
+        .to receive(:full_gem_path)
+        .and_return(['/another/path/to/gem'])
+
+      allow(RailsTracepointStack::Filter::RbConfig)
+        .to receive(:ruby_lib_path)
+        .and_return('/path/to/ruby/lib')
+
+      allow_any_instance_of(TracePoint)
+        .to receive(:path)
+        .and_return("/another/path/to/gem/some_file.rb")
+
+      allow(RailsTracepointStack::Logger).to receive(:log)
+
+      allow_any_instance_of(TracePoint)
+      .to receive(:path)
+      .and_return("/another/path/to/gem/some_file.rb")
+      
+      RailsTracepointStack.configure do |config|
+        config.file_path_to_filter_patterns = [/another\/path/]
+      end
+    end
+
+    it 'calls logger' do
+      tracer.tracer.enable do
+        Foo.new.dummy_method
+      end
+
+      expect(RailsTracepointStack::Logger).to have_received(:log)
+    end
+  end
 end

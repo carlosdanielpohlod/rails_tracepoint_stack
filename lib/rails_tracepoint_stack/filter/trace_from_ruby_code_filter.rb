@@ -9,8 +9,8 @@ module RailsTracepointStack
 
       private
 
-      def not_ignore_external_source_traces?
-        return false if RailsTracepointStack.configuration.log_external_sources
+      def self.not_ignore_external_source_traces?
+        RailsTracepointStack.configuration.log_external_sources
       end
     end
   end
