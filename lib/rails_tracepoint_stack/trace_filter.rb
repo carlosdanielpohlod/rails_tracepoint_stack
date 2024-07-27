@@ -6,16 +6,16 @@ module RailsTracepointStack
     def self.ignore_trace?(trace:)
       if defined_custom_patterns_to_watch? && not_attends_the_custom_pattern_to_watch?(trace)
         return true
-      
+      end
       if should_ignore_because_is_a_internal_dependency?(trace)
         return true
-
+      end 
       if should_ignore_because_is_ruby_trace?(trace)
         return true
-
+      end 
       if should_ignore_because_not_is_a_trace_required_by_the_custom_configs?(trace)
         return true
-
+      end
       return false
     end
 
