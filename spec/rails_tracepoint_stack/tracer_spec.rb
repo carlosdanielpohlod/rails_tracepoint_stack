@@ -91,7 +91,7 @@ RSpec.describe RailsTracepointStack::Tracer do
     end
   end
 
-  context "when the log should be ignored because is a ruby dependency" do
+  context "when the log should be ignored because is a gem dependency" do
     before do
       allow(RailsTracepointStack::Filter::GemPath)
         .to receive(:full_gem_path)
@@ -130,40 +130,6 @@ RSpec.describe RailsTracepointStack::Tracer do
       allow(RailsTracepointStack::Filter::RbConfig)
         .to receive(:ruby_lib_path)
         .and_return('/path/to/ruby/lib')
-
-      allow_any_instance_of(TracePoint)
-        .to receive(:path)
-        .and_return("/path/to/gem/some_file.rb")
-
-      allow(RailsTracepointStack::Logger).to receive(:log)
-
-      RailsTracepointStack.configure do |config|
-        config.log_external_sources = false
-      end
-    end
-
-    it 'does not call logger' do
-      tracer.tracer.enable do
-        Foo.new.dummy_method
-      end
-
-      expect(RailsTracepointStack::Logger).not_to have_received(:log)
-    end
-  end
-
-  context "when the log should be ignored because is a gem dependency" do
-    before do
-      allow_any_instance_of(TracePoint)
-        .to receive(:path)
-        .and_return("/path/to/gem/some_file.rb")
-
-      allow(RailsTracepointStack::Filter::GemPath)
-        .to receive(:full_gem_path)
-        .and_return(['/path/to/gem/'])
-
-      allow(RailsTracepointStack::Filter::RbConfig)
-        .to receive(:ruby_lib_path)
-        .and_return('ruby/lib')
 
       allow_any_instance_of(TracePoint)
         .to receive(:path)

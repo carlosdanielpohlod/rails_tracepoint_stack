@@ -7,7 +7,7 @@ module RailsTracepointStack
       if not_attends_any_custom_pattern_to_ignore?(trace)
         return true
       end
-      unless is_a_trace_required_to_watch_by_the_custom_configs?(trace)
+      if is_a_trace_required_to_watch_by_the_custom_configs?(trace)
         return false
       end
       if should_ignore_because_is_a_internal_dependency?(trace)

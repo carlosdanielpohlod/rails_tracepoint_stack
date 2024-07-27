@@ -114,7 +114,7 @@ RSpec.describe RailsTracepointStack::TraceFilter do
       end
 
       it 'does not ignore the trace' do
-        expect(described_class.ignore_trace?(trace: pattern_trace)).to be true
+        expect(described_class.ignore_trace?(trace: pattern_trace)).to be false
       end
     end
   end
