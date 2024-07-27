@@ -3,9 +3,7 @@ module RailsTracepointStack
     class TraceFromDependenciesFilter
       def self.ignore_trace?(trace:)
         return false if not_ignore_external_source_traces?
-        p file_path_starts_with_gem_path?(trace)
-        p file_path_starts_with_ruby_lib_path?(trace)
-        p file_path_include_bundler_gems_path?(trace)
+        
         file_path_starts_with_gem_path?(trace) ||
         file_path_starts_with_ruby_lib_path?(trace) ||
         file_path_include_bundler_gems_path?(trace)
