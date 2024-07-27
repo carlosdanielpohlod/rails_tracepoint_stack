@@ -51,7 +51,7 @@ RSpec.describe RailsTracepointStack::Tracer do
 
         expect(RailsTracepointStack::Logger)
           .to have_received(:log)
-          # .with("called: Foo#dummy_method in /app/rails_tracepoint_stack/spec/tracer_spec.rb:6 with params: {}")
+          .with("called: Foo#dummy_method in /app/rails_tracepoint_stack/spec/tracer_spec.rb:6 with params: {}")
       end
     end
 
@@ -153,13 +153,17 @@ RSpec.describe RailsTracepointStack::Tracer do
 
   context "when the log should be ignored because is a gem dependency" do
     before do
+      allow_any_instance_of(TracePoint)
+        .to receive(:path)
+        .and_return("/path/to/gem/some_file.rb")
+
       allow(RailsTracepointStack::Filter::GemPath)
         .to receive(:full_gem_path)
-        .and_return(['/path/to/gem'])
+        .and_return(['/path/to/gem/'])
 
       allow(RailsTracepointStack::Filter::RbConfig)
         .to receive(:ruby_lib_path)
-        .and_return('/path/to/ruby/lib')
+        .and_return('ruby/lib')
 
       allow_any_instance_of(TracePoint)
         .to receive(:path)
@@ -257,9 +261,9 @@ RSpec.describe RailsTracepointStack::Tracer do
 
       allow(RailsTracepointStack::Logger).to receive(:log)
 
-      allow_any_instance_of(TracePoint)
-      .to receive(:path)
-      .and_return("/another/path/to/gem/some_file.rb")
+      allow_any_instance_of(RailsTracepointStack::Trace)
+        .to receive(:file_path)
+        .and_return("/another/path/to/gem/some_file.rb")
       
       RailsTracepointStack.configure do |config|
         config.file_path_to_filter_patterns = [/another\/path/]
