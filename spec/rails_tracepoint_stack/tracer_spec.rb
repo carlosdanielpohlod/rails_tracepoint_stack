@@ -40,7 +40,6 @@ RSpec.describe RailsTracepointStack::Tracer do
       before do
         RailsTracepointStack.configure do |config|
           config.log_format = :text
-          config.log_external_sources = false
         end
       end
 
