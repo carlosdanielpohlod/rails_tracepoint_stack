@@ -8,15 +8,4 @@ RSpec.configure do |config|
   config.order = :random
   config.filter_run_when_matching :focus
   config.raise_errors_for_deprecations!
-
-  config.around(:each) do |example|
-    original_configuration = RailsTracepointStack.configuration.dup
-    example.run
-    RailsTracepointStack.configuration = original_configuration
-  end
-
-  # Desabilita o tracer globalmente nos testes
-  config.before(:suite) do
-    $rails_tracer_rtps.disable if $rails_tracer_rtps
-  end
 end
