@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 RSpec.describe RailsTracepointStack::Filter::TraceToIgnoreFilter do
-  describe '.ignore_trace?' do
+  describe '.attends_some_custom_pattern_to_ignore?' do
     let(:trace) { double('trace', file_path: file_path) }
 
     before do
@@ -13,7 +13,7 @@ RSpec.describe RailsTracepointStack::Filter::TraceToIgnoreFilter do
       let(:file_path) { '/some/ignored_path/file.rb' }
 
       it 'returns true' do
-        expect(described_class.ignore_trace?(trace: trace)).to be true
+        expect(described_class.attends_some_custom_pattern_to_ignore?(trace: trace)).to be true
       end
     end
 
@@ -22,7 +22,7 @@ RSpec.describe RailsTracepointStack::Filter::TraceToIgnoreFilter do
       let(:file_path) { '/some/regular_path/file.rb' }
 
       it 'returns false' do
-        expect(described_class.ignore_trace?(trace: trace)).to be false
+        expect(described_class.attends_some_custom_pattern_to_ignore?(trace: trace)).to be false
       end
     end
 
@@ -30,12 +30,12 @@ RSpec.describe RailsTracepointStack::Filter::TraceToIgnoreFilter do
       let(:ignore_patterns) { [/ignored_path/, /another_path/, /secret/] }
 
       it 'returns true if the trace file path matches any pattern' do
-        expect(described_class.ignore_trace?(trace: double('trace', file_path: '/another_path/file.rb'))).to be true
-        expect(described_class.ignore_trace?(trace: double('trace', file_path: '/some/secret/file.rb'))).to be true
+        expect(described_class.attends_some_custom_pattern_to_ignore?(trace: double('trace', file_path: '/another_path/file.rb'))).to be true
+        expect(described_class.attends_some_custom_pattern_to_ignore?(trace: double('trace', file_path: '/some/secret/file.rb'))).to be true
       end
 
       it 'returns false if the trace file path does not match any pattern' do
-        expect(described_class.ignore_trace?(trace: double('trace', file_path: '/unmatched_path/file.rb'))).to be false
+        expect(described_class.attends_some_custom_pattern_to_ignore?(trace: double('trace', file_path: '/unmatched_path/file.rb'))).to be false
       end
     end
   end

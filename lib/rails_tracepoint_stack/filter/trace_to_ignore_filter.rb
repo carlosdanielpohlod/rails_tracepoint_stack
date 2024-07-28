@@ -1,7 +1,7 @@
 module RailsTracepointStack
   module Filter
-    class TraceToIgnoreFilter
-      def self.ignore_trace?(trace:)
+    module TraceToIgnoreFilter
+      def self.attends_some_custom_pattern_to_ignore?(trace:)
         return false unless RailsTracepointStack.configuration.ignore_patterns.any?
         
         RailsTracepointStack
