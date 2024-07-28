@@ -1,8 +1,9 @@
 require 'spec_helper'
 
 RSpec.describe RailsTracepointStack::Filter::CustomTraceSelectorFilter do
-  describe '.ignore_trace?' do
-    subject { described_class.ignore_trace?(trace: trace) }
+  describe '.is_a_trace_required_to_watch_by_the_custom_configs?' do  
+    subject { described_class.is_a_trace_required_to_watch_by_the_custom_configs?(trace: trace) }
+    
     context "when the trace's file path matches a custom pattern" do
       let(:file_path) { 'app/controllers/posts_controller' }
       let(:trace) { instance_double(RailsTracepointStack::Trace, file_path: file_path) }
