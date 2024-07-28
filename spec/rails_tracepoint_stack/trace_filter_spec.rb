@@ -1,12 +1,11 @@
 require 'spec_helper'
-require 'ostruct'
 
 RSpec.describe RailsTracepointStack::TraceFilter do
+  include RailsTracepointStack::TraceFilter
+
   before do
     initialize_gem_configuration!
   end
-
-  
 
   context 'when trace matches an ignore pattern' do
     before do
@@ -31,7 +30,7 @@ RSpec.describe RailsTracepointStack::TraceFilter do
     end
 
     it 'ignores the trace' do
-      expect(described_class.ignore_trace?(trace: pattern_trace)).to be true
+      expect(ignore_trace?(trace: pattern_trace)).to be true
     end
   end
 
@@ -55,7 +54,7 @@ RSpec.describe RailsTracepointStack::TraceFilter do
     end
 
     it 'does not ignore the trace' do
-      expect(described_class.ignore_trace?(trace: normal_trace)).to be false
+      expect(ignore_trace?(trace: normal_trace)).to be false
     end
   end
 
@@ -87,7 +86,7 @@ RSpec.describe RailsTracepointStack::TraceFilter do
       end
 
       it 'ignores the trace' do
-        expect(described_class.ignore_trace?(trace: pattern_trace)).to be false
+        expect(ignore_trace?(trace: pattern_trace)).to be false
       end
     end
 
@@ -114,7 +113,7 @@ RSpec.describe RailsTracepointStack::TraceFilter do
       end
 
       it 'does not ignore the trace' do
-        expect(described_class.ignore_trace?(trace: pattern_trace)).to be false
+        expect(ignore_trace?(trace: pattern_trace)).to be false
       end
     end
   end

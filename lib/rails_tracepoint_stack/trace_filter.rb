@@ -1,28 +1,26 @@
-require 'rails_tracepoint_stack/filter/gem_path'
-require 'rails_tracepoint_stack/filter/rb_config'
 require 'rails_tracepoint_stack/filter/custom_trace_selector_filter'
 require 'rails_tracepoint_stack/filter/trace_from_dependencies_filter'
 require 'rails_tracepoint_stack/filter/trace_from_ruby_code_filter'
 require 'rails_tracepoint_stack/filter/trace_to_ignore_filter'
 
 module RailsTracepointStack
-  class TraceFilter
+  module TraceFilter
     include RailsTracepointStack::Filter::CustomTraceSelectorFilter
     include RailsTracepointStack::Filter::TraceFromDependenciesFilter
     include RailsTracepointStack::Filter::TraceFromRubyCodeFilter
     include RailsTracepointStack::Filter::TraceToIgnoreFilter
 
-    def self.ignore_trace?(trace:)
-      if attends_some_custom_pattern_to_ignore?(trace)
+    def ignore_trace?(trace:)
+      if attends_some_custom_pattern_to_ignore?(trace:)
         return true
       end
-      if is_a_trace_required_to_watch_by_the_custom_configs?(trace)
+      if is_a_trace_required_to_watch_by_the_custom_configs?(trace:)
         return false
       end
-      if should_ignore_because_is_a_internal_dependency?(trace)
+      if should_ignore_because_is_a_internal_dependency?(trace:)
         return true
       end
-      if should_ignore_because_is_ruby_trace?(trace)
+      if should_ignore_because_is_ruby_trace?(trace:)
         return true
       end 
 
