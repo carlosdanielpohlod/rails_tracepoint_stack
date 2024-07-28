@@ -1,6 +1,8 @@
 require 'spec_helper'
 
 RSpec.describe RailsTracepointStack::Filter::TraceFromDependenciesFilter do
+  include RailsTracepointStack::Filter::TraceFromDependenciesFilter
+  
   context 'when trace is from ruby_lib_path' do
     before do
       allow(RailsTracepointStack::Filter::GemPath)
@@ -23,7 +25,7 @@ RSpec.describe RailsTracepointStack::Filter::TraceFromDependenciesFilter do
     end
 
     it 'ignores the trace' do
-      expect(described_class.should_ignore_because_is_a_internal_dependency?(trace: internal_trace)).to be true
+      expect(should_ignore_because_is_a_internal_dependency?(trace: internal_trace)).to be true
     end
   end
 
@@ -49,7 +51,7 @@ RSpec.describe RailsTracepointStack::Filter::TraceFromDependenciesFilter do
     end
 
     it 'ignores the trace' do
-      expect(described_class.should_ignore_because_is_a_internal_dependency?(trace: gem_path_trace))
+      expect(should_ignore_because_is_a_internal_dependency?(trace: gem_path_trace))
         .to be true
     end
   end
@@ -75,7 +77,7 @@ RSpec.describe RailsTracepointStack::Filter::TraceFromDependenciesFilter do
     end
 
     it 'ignores the trace' do
-      expect(described_class.should_ignore_because_is_a_internal_dependency?(trace: ruby_lib_trace)).to be true
+      expect(should_ignore_because_is_a_internal_dependency?(trace: ruby_lib_trace)).to be true
     end
   end
 
@@ -101,7 +103,7 @@ RSpec.describe RailsTracepointStack::Filter::TraceFromDependenciesFilter do
     end
 
     it 'does not ignore the trace' do
-      expect(described_class.should_ignore_because_is_a_internal_dependency?(trace: external_trace)).to be false
+      expect(should_ignore_because_is_a_internal_dependency?(trace: external_trace)).to be false
     end
   end
 end

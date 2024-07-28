@@ -2,7 +2,7 @@ require 'spec_helper'
 
 RSpec.describe RailsTracepointStack::TraceFilter do
   include RailsTracepointStack::TraceFilter
-
+  
   before do
     initialize_gem_configuration!
   end
@@ -35,8 +35,7 @@ RSpec.describe RailsTracepointStack::TraceFilter do
   end
 
   ## Flaky test, this one fails when running all tests, but works when running only this test
-  
-  
+
   context 'when trace does not meet any ignore criteria' do
     before do
       allow(RailsTracepointStack::Filter::GemPath)
@@ -57,10 +56,6 @@ RSpec.describe RailsTracepointStack::TraceFilter do
       expect(ignore_trace?(trace: normal_trace)).to be false
     end
   end
-
-  
-
-  
 
   context "when defined file path to filter patterns" do
     context "and trace not matches" do

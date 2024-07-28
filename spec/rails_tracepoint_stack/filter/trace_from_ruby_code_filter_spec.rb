@@ -1,6 +1,8 @@
 require 'spec_helper'
 
 RSpec.describe RailsTracepointStack::Filter::TraceFromRubyCodeFilter do
+  include RailsTracepointStack::Filter::TraceFromRubyCodeFilter
+
   describe '.should_ignore_because_is_ruby_trace?' do
     let(:trace) { double('trace') }
 
@@ -13,7 +15,7 @@ RSpec.describe RailsTracepointStack::Filter::TraceFromRubyCodeFilter do
 
       it 'does not ignore any traces' do
         allow(trace).to receive(:file_path).and_return('<internal:kernel>')
-        expect(described_class.should_ignore_because_is_ruby_trace?(trace: trace)).to be false
+        expect(should_ignore_because_is_ruby_trace?(trace: trace)).to be false
       end
     end
 
@@ -22,10 +24,10 @@ RSpec.describe RailsTracepointStack::Filter::TraceFromRubyCodeFilter do
 
       it 'ignores internal and eval traces' do
         allow(trace).to receive(:file_path).and_return('<internal:kernel>')
-        expect(described_class.should_ignore_because_is_ruby_trace?(trace: trace)).to be true
+        expect(should_ignore_because_is_ruby_trace?(trace: trace)).to be true
 
         allow(trace).to receive(:file_path).and_return('(eval)')
-        expect(described_class.should_ignore_because_is_ruby_trace?(trace: trace)).to be true
+        expect(should_ignore_because_is_ruby_trace?(trace: trace)).to be true
       end
     end
   end
