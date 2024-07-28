@@ -2,11 +2,13 @@ require 'rails_tracepoint_stack/filter/gem_path'
 require 'rails_tracepoint_stack/filter/rb_config'
 require 'rails_tracepoint_stack/filter/custom_trace_selector_filter'
 require 'rails_tracepoint_stack/filter/trace_from_dependencies_filter'
+require 'rails_tracepoint_stack/filter/trace_from_ruby_code_filter'
 
 module RailsTracepointStack
   class TraceFilter
     include RailsTracepointStack::Filter::CustomTraceSelectorFilter
     include RailsTracepointStack::Filter::TraceFromDependenciesFilter
+    include RailsTracepointStack::Filter::TraceFromRubyCodeFilter
 
     def self.ignore_trace?(trace:)
       if not_attends_any_custom_pattern_to_ignore?(trace)

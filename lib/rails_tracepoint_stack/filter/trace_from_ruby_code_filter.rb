@@ -1,7 +1,7 @@
 module RailsTracepointStack
   module Filter
-    class TraceFromRubyCodeFilter
-      def self.ignore_trace?(trace:)
+    module TraceFromRubyCodeFilter
+      def self.should_ignore_because_is_ruby_trace?(trace:)
         return false if not_ignore_external_source_traces?
 
         trace.file_path.start_with?('<internal:') || trace.file_path == '(eval)'
