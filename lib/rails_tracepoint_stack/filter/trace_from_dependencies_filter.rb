@@ -1,7 +1,7 @@
 module RailsTracepointStack
   module Filter
-    class TraceFromDependenciesFilter
-      def self.ignore_trace?(trace:)
+    module TraceFromDependenciesFilter
+      def self.should_ignore_because_is_a_internal_dependency?(trace:)
         return false if not_ignore_external_source_traces?
         
         file_path_starts_with_gem_path?(trace) ||
