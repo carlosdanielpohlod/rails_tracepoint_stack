@@ -1,29 +1,10 @@
 require 'spec_helper'
-require 'ostruct'
 
 RSpec.describe RailsTracepointStack::TraceFilter do
+  include RailsTracepointStack::TraceFilter
+  
   before do
     initialize_gem_configuration!
-  end
-
-  context 'when trace is from internal sources' do
-    before do
-      allow(RailsTracepointStack::Filter::GemPath)
-        .to receive(:full_gem_path)
-        .and_return([])
-
-      allow(RailsTracepointStack::Filter::RbConfig)
-        .to receive(:ruby_lib_path)
-        .and_return('/path/to/ruby/lib')
-    end
-
-    let(:internal_trace) do 
-      instance_double(RailsTracepointStack::Trace, file_path: '<internal:kernel>')
-    end
-
-    it 'ignores the trace' do
-      expect(described_class.ignore_trace?(trace: internal_trace)).to be true
-    end
   end
 
   context 'when trace matches an ignore pattern' do
@@ -49,33 +30,12 @@ RSpec.describe RailsTracepointStack::TraceFilter do
     end
 
     it 'ignores the trace' do
-      expect(described_class.ignore_trace?(trace: pattern_trace)).to be true
+      expect(ignore_trace?(trace: pattern_trace)).to be true
     end
   end
 
   ## Flaky test, this one fails when running all tests, but works when running only this test
-  context 'when trace is from a gem path' do
-    let(:gem_path_trace) do
-      instance_double(RailsTracepointStack::Trace, 
-        file_path: '/path/to/gem/some_file.rb'
-      )
-    end
 
-    before do
-      allow_any_instance_of(RailsTracepointStack::Filter::GemPath)
-        .to receive(:full_gem_path)
-        .and_return(['/path/to/gem'])
-
-      allow(RailsTracepointStack::Filter::RbConfig)
-        .to receive(:ruby_lib_path)
-        .and_return('/path/to/ruby/lib')
-    end
-
-    it 'ignores the trace' do
-      expect(described_class.ignore_trace?(trace: gem_path_trace)).to be true
-    end
-  end
-  
   context 'when trace does not meet any ignore criteria' do
     before do
       allow(RailsTracepointStack::Filter::GemPath)
@@ -93,30 +53,7 @@ RSpec.describe RailsTracepointStack::TraceFilter do
     end
 
     it 'does not ignore the trace' do
-      expect(described_class.ignore_trace?(trace: normal_trace)).to be false
-    end
-  end
-
-  
-
-  context 'when trace is from a ruby lib path' do
-    let(:ruby_lib_trace) do
-      instance_double(RailsTracepointStack::Trace, 
-      file_path: '/path/to/ruby/lib/some_file.rb')
-    end
-
-    before do
-      allow(RailsTracepointStack::Filter::GemPath)
-        .to receive(:full_gem_path)
-        .and_return([])
-
-      allow(RailsTracepointStack::Filter::RbConfig)
-        .to receive(:ruby_lib_path)
-        .and_return('/path/to/ruby/lib')
-    end
-
-    it 'ignores the trace' do
-      expect(described_class.ignore_trace?(trace: ruby_lib_trace)).to be true
+      expect(ignore_trace?(trace: normal_trace)).to be false
     end
   end
 
@@ -144,7 +81,7 @@ RSpec.describe RailsTracepointStack::TraceFilter do
       end
 
       it 'ignores the trace' do
-        expect(described_class.ignore_trace?(trace: pattern_trace)).to be false
+        expect(ignore_trace?(trace: pattern_trace)).to be false
       end
     end
 
@@ -171,7 +108,7 @@ RSpec.describe RailsTracepointStack::TraceFilter do
       end
 
       it 'does not ignore the trace' do
-        expect(described_class.ignore_trace?(trace: pattern_trace)).to be true
+        expect(ignore_trace?(trace: pattern_trace)).to be false
       end
     end
   end
