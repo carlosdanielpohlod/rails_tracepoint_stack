@@ -11,16 +11,16 @@ module RailsTracepointStack
     include RailsTracepointStack::Filter::TraceToIgnoreFilter
 
     def ignore_trace?(trace:)
-      if attends_some_custom_pattern_to_ignore?(trace:)
+      if attends_some_custom_pattern_to_ignore?(trace: trace)
         return true
       end
-      if is_a_trace_required_to_watch_by_the_custom_configs?(trace:)
+      if is_a_trace_required_to_watch_by_the_custom_configs?(trace: trace)
         return false
       end
-      if should_ignore_because_is_a_internal_dependency?(trace:)
+      if should_ignore_because_is_a_internal_dependency?(trace: trace)
         return true
       end
-      if should_ignore_because_is_ruby_trace?(trace:)
+      if should_ignore_because_is_ruby_trace?(trace: trace)
         return true
       end 
 
