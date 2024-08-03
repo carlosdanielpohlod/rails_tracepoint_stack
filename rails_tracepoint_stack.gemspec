@@ -7,7 +7,6 @@ Gem::Specification.new do |s|
   s.description = "A formatted output of all methods called in your rails application of code created by the developer, with the complete path to the class/module, including passed params."
   s.authors     = ["Carlos Daniel Pohlod"]
   s.email       = "carlospohlod@gmail.com"
-
   s.files       = [
     "lib/rails_tracepoint_stack.rb",
     "lib/rails_tracepoint_stack/configuration.rb",
