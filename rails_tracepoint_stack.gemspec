@@ -17,7 +17,11 @@ Gem::Specification.new do |s|
     "lib/rails_tracepoint_stack/version.rb",
     "lib/rails_tracepoint_stack/trace.rb",
     "lib/rails_tracepoint_stack/filter/gem_path.rb",
-    "lib/rails_tracepoint_stack/filter/rb_config.rb"
+    "lib/rails_tracepoint_stack/filter/rb_config.rb",
+    "lib/rails_tracepoint_stack/filter/custom_trace_selector_filter.rb",
+    "lib/rails_tracepoint_stack/filter/trace_from_dependencies_filter.rb",
+    "lib/rails_tracepoint_stack/filter/trace_from_ruby_code_filter.rb",
+    "lib/rails_tracepoint_stack/filter/trace_to_ignore_filter.rb",
   ]
   s.homepage    = "https://github.com/carlosdanielpohlod/rails_tracepoint_stack/"
   s.license     = "MIT"
