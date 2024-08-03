@@ -1,15 +1,5 @@
 RSpec.shared_examples "tracer success examples asserts" do
   context "when log format is text" do
-    before do
-      # RailsTracepointStack.configure do |config|
-      #   config.log_format = :text
-      # end
-
-      allow(RailsTracepointStack.configuration)
-        .to receive(:log_format)
-        .and_return(:text)
-    end
-
     it 'calls logger with correct log' do
       tracer.tracer.enable do
         Foo.new.dummy_method
@@ -23,10 +13,6 @@ RSpec.shared_examples "tracer success examples asserts" do
 
   context "when log format is json" do
     before do
-      # RailsTracepointStack.configure do |config|
-      #   config.log_format = :json
-      # end
-
       allow(RailsTracepointStack.configuration)
         .to receive(:log_format)
         .and_return(:json)
