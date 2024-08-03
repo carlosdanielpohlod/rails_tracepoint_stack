@@ -1,3 +1,6 @@
+require 'rails_tracepoint_stack/filter/gem_path'
+require 'rails_tracepoint_stack/filter/rb_config'
+
 module RailsTracepointStack
   module Filter
     module TraceFromDependenciesFilter

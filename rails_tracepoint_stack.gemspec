@@ -7,6 +7,7 @@ Gem::Specification.new do |s|
   s.description = "A formatted output of all methods called in your rails application of code created by the developer, with the complete path to the class/module, including passed params."
   s.authors     = ["Carlos Daniel Pohlod"]
   s.email       = "carlospohlod@gmail.com"
+
   s.files       = [
     "lib/rails_tracepoint_stack.rb",
     "lib/rails_tracepoint_stack/configuration.rb",
@@ -16,6 +17,12 @@ Gem::Specification.new do |s|
     "lib/rails_tracepoint_stack/tracer.rb",
     "lib/rails_tracepoint_stack/version.rb",
     "lib/rails_tracepoint_stack/trace.rb",
+    "lib/rails_tracepoint_stack/filter/gem_path.rb",
+    "lib/rails_tracepoint_stack/filter/rb_config.rb",
+    "lib/rails_tracepoint_stack/filter/custom_trace_selector_filter.rb",
+    "lib/rails_tracepoint_stack/filter/trace_from_dependencies_filter.rb",
+    "lib/rails_tracepoint_stack/filter/trace_from_ruby_code_filter.rb",
+    "lib/rails_tracepoint_stack/filter/trace_to_ignore_filter.rb",
     "lib/rails_tracepoint_stack/filter/gem_path.rb",
     "lib/rails_tracepoint_stack/filter/rb_config.rb"
   ]
