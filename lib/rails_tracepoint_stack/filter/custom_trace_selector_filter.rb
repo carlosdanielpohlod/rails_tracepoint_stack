@@ -4,7 +4,7 @@ module RailsTracepointStack
       def is_a_trace_required_to_watch_by_the_custom_configs?(trace:)
         return false unless RailsTracepointStack.configuration.file_path_to_filter_patterns.any?
 
-        !filter_match_a_custom_pattern_to_be_not_ignored?(trace)
+        filter_match_a_custom_pattern_to_be_not_ignored?(trace)
       end
 
       private

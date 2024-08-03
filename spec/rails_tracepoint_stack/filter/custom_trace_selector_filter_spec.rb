@@ -11,10 +11,12 @@ RSpec.describe RailsTracepointStack::Filter::CustomTraceSelectorFilter do
       let(:trace) { instance_double(RailsTracepointStack::Trace, file_path: file_path) }
 
       before do
-        allow(RailsTracepointStack.configuration).to receive(:file_path_to_filter_patterns).and_return([/app\/controllers/])
+        allow(RailsTracepointStack.configuration)
+          .to receive(:file_path_to_filter_patterns)
+          .and_return([/app\/controllers/])
       end
 
-      it { is_expected.to be_falsey }
+      it { is_expected.to be_truthy }
     end
    
     context "when the trace's file path does not match a custom pattern" do
@@ -22,10 +24,12 @@ RSpec.describe RailsTracepointStack::Filter::CustomTraceSelectorFilter do
       let(:trace) { instance_double(RailsTracepointStack::Trace, file_path: file_path) }
 
       before do
-        allow(RailsTracepointStack.configuration).to receive(:file_path_to_filter_patterns).and_return([/app\/controllers/])
+        allow(RailsTracepointStack.configuration)
+          .to receive(:file_path_to_filter_patterns)
+          .and_return([/app\/controllers/])
       end
 
-      it { is_expected.to be_truthy }
+      it { is_expected.to be_falsey }
     end
   end
 end 
