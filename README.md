@@ -1,3 +1,9 @@
+## Description
+
+This project aims to create a logger for method calls in Ruby <img src="https://i.pinimg.com/originals/3f/f8/de/3ff8de311854ae91dae1919f7806ff86.gif" width="40px" heigth="40px">, excluding methods from gems, internal classes, etc.
+
+By utilizing Ruby's `TracePoint` functionality, it allows monitoring and displaying the methods called during the application's execution, filtering to show only the methods defined in the application's own code.
+
 ## Install
 
 ```bash
@@ -9,12 +15,6 @@ set env
 RAILS_TRACEPOINT_STACK_ENABLED=true
 ``` 
 if you wanna enable it globally on your Rails app
-
-## Description
-
-This project aims to create a logger for method calls in Ruby <img src="https://i.pinimg.com/originals/3f/f8/de/3ff8de311854ae91dae1919f7806ff86.gif" width="40px" heigth="40px">, excluding methods from gems, internal classes, etc.
-
-By utilizing Ruby's `TracePoint` functionality, it allows monitoring and displaying the methods called during the application's execution, filtering to show only the methods defined in the application's own code.
 
 ## Usage 
 
@@ -37,7 +37,7 @@ class Bar
   end
 
   def perform
-    puts_message(message)
+    puts_message(@message)
   end
 end
 ```
@@ -48,7 +48,7 @@ then
 Bar.new(message: "Hello World").call
 ```
 
-will produce an output as:
+will produce an output (by default saved on `log/rails_tracepoint_stack.log`) as:
 
 ```json
 called: Bar#initialize in COMPLETE_PATH_TO_YOUR_FILE/app/services/bar.rb:METHOD_LINE with params: {:message=>"Hello World"}

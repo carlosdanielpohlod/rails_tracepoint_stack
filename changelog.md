@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.3.4
+
+**Changes**
+
+- Fix flaky tests by @danielmbrasil [PR #27](https://github.com/carlosdanielpohlod/rails_tracepoint_stack/pull/27)
+
+- Huge refactor of filters class, separating in modules by filter type [PR #18](https://github.com/carlosdanielpohlod/rails_tracepoint_stack/pull/18)
+
+- Some other code refactors
+
+## 0.3.3
+
+**Changes**
+
+- Add autoload of all lib files on test_helper
+- Fix some tests
+
+**BugFix**
+
+- Fixed the Configuration module not loading the default value for the configuration attributes
+
 ## 0.3.1
 
 **Changes:**

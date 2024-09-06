@@ -1,17 +1,19 @@
-require "json"
-require "rails_tracepoint_stack/configuration"
-require "rails_tracepoint_stack/log_formatter"
-require "rails_tracepoint_stack/tracer"
+require 'rails_tracepoint_stack/configuration'
+require 'rails_tracepoint_stack/log_formatter'
+require 'rails_tracepoint_stack/tracer'
 
 $rails_tracer_rtps = nil
 
 module RailsTracepointStack
   class << self
-    attr_accessor :configuration, :logger
+    attr_writer :configuration, :logger
+
+    def configuration
+      @configuration ||= RailsTracepointStack::Configuration.new
+    end
   end
 
   def self.configure
-    self.configuration ||= RailsTracepointStack::Configuration.new
     yield(configuration)
   end
 

@@ -1,63 +1,30 @@
-require "rails_tracepoint_stack/filter/gem_path"
-require "rails_tracepoint_stack/filter/rb_config"
+require 'rails_tracepoint_stack/filter/custom_trace_selector_filter'
+require 'rails_tracepoint_stack/filter/trace_from_dependencies_filter'
+require 'rails_tracepoint_stack/filter/trace_from_ruby_code_filter'
+require 'rails_tracepoint_stack/filter/trace_to_ignore_filter'
 
 module RailsTracepointStack
-  class TraceFilter
-    def self.ignore_trace?(trace:)
-      if defined_file_path_to_filter_patterns?
-        not_matches_file_path_to_filter_patterns?(trace)
-      else
-        contains_to_ignore_strings?(trace) || from_gempath_or_lib_path?(trace) || is_a_to_ignore_pattern?(trace)
+  module TraceFilter
+    include RailsTracepointStack::Filter::CustomTraceSelectorFilter
+    include RailsTracepointStack::Filter::TraceFromDependenciesFilter
+    include RailsTracepointStack::Filter::TraceFromRubyCodeFilter
+    include RailsTracepointStack::Filter::TraceToIgnoreFilter
+
+    def ignore_trace?(trace:)
+      if attends_some_custom_pattern_to_ignore?(trace: trace)
+        return true
       end
-    end
-
-    private
-
-    def self.contains_to_ignore_strings?(trace)
-      trace.file_path.start_with?("<internal:") || trace.file_path == "(eval)"
-    end
-
-    def self.from_gempath_or_lib_path?(trace)
-      !RailsTracepointStack.configuration&.log_external_sources &&
-        (
-          file_path_starts_with_gem_path?(trace) ||
-          file_path_starts_with_ruby_lib_path?(trace) ||
-          file_path_starts_with_bundler_path?(trace)
-        )
-    end
-
-    def self.is_a_to_ignore_pattern?(trace)
-      RailsTracepointStack.configuration&.ignore_patterns&.any? { |pattern| trace.file_path.match?(pattern) }
-    end
-
-    def self.file_path_starts_with_gem_path?(trace)
-      gem_paths.any? { |path| trace.file_path.start_with?(path) }
-    end
-
-    def self.file_path_starts_with_ruby_lib_path?(trace)
-      trace.file_path.start_with?(ruby_lib_path)
-    end
-
-    def self.file_path_starts_with_bundler_path?(trace)
-      trace.file_path.include?("gems/bundler")
-    end
-
-    def self.gem_paths
-      @gem_paths ||= RailsTracepointStack::Filter::GemPath.full_gem_path
-    end
-
-    def self.ruby_lib_path
-      @ruby_lib_path ||= RailsTracepointStack::Filter::RbConfig.ruby_lib_path
-    end
-
-    def self.defined_file_path_to_filter_patterns?
-      RailsTracepointStack.configuration&.file_path_to_filter_patterns&.any?
-    end
-
-    def self.not_matches_file_path_to_filter_patterns?(trace)
-      !RailsTracepointStack.configuration.file_path_to_filter_patterns.any? do |pattern|
-        trace.file_path.match?(pattern)
+      if is_a_trace_required_to_watch_by_the_custom_configs?(trace: trace)
+        return false
       end
+      if should_ignore_because_is_a_internal_dependency?(trace: trace)
+        return true
+      end
+      if should_ignore_because_is_ruby_trace?(trace: trace)
+        return true
+      end
+
+      return false
     end
   end
 end
