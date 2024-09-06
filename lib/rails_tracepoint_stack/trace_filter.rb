@@ -22,7 +22,7 @@ module RailsTracepointStack
       end
       if should_ignore_because_is_ruby_trace?(trace: trace)
         return true
-      end 
+      end
 
       return false
     end

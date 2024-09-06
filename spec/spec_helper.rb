@@ -13,6 +13,6 @@ RSpec.configure do |config|
   config.around do |example|
     original_config = RailsTracepointStack.configuration.dup
     example.run
-    RailsTracepointStack.configuration = original_config  
+    RailsTracepointStack.configuration = original_config
   end
 end

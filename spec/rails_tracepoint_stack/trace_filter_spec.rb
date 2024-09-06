@@ -2,7 +2,7 @@ require 'spec_helper'
 
 RSpec.describe RailsTracepointStack::TraceFilter do
   include RailsTracepointStack::TraceFilter
-  
+
   before do
     initialize_gem_configuration!
   end
@@ -16,16 +16,16 @@ RSpec.describe RailsTracepointStack::TraceFilter do
       allow(RailsTracepointStack::Filter::GemPath)
         .to receive(:full_gem_path)
         .and_return([])
-      
+
       allow(RailsTracepointStack::Filter::RbConfig)
         .to receive(:ruby_lib_path)
-        .and_return('/path/to/ruby/lib')
+        .and_return("/path/to/ruby/lib")
     end
 
-    let(:pattern_trace) do 
+    let(:pattern_trace) do
       instance_double(
-        RailsTracepointStack::Trace, 
-        file_path: 'some_path/ignore_pattern/some_file.rb'
+        RailsTracepointStack::Trace,
+        file_path: "some_path/ignore_pattern/some_file.rb"
       )
     end
 
@@ -41,15 +41,15 @@ RSpec.describe RailsTracepointStack::TraceFilter do
       allow(RailsTracepointStack::Filter::GemPath)
         .to receive(:full_gem_path)
         .and_return([])
-      
+
       allow(RailsTracepointStack::Filter::RbConfig)
         .to receive(:ruby_lib_path)
-        .and_return('/path/to/ruby/lib')
+        .and_return("/path/to/ruby/lib")
     end
 
-    let(:normal_trace) do 
-      instance_double(RailsTracepointStack::Trace, 
-      file_path: 'some_path/some_file.rb')
+    let(:normal_trace) do
+      instance_double(RailsTracepointStack::Trace,
+        file_path: "some_path/some_file.rb")
     end
 
     it 'does not ignore the trace' do
@@ -70,13 +70,13 @@ RSpec.describe RailsTracepointStack::TraceFilter do
 
         allow(RailsTracepointStack::Filter::RbConfig)
           .to receive(:ruby_lib_path)
-          .and_return('/path/to/ruby/lib')
+          .and_return("/path/to/ruby/lib")
       end
 
-      let(:pattern_trace) do 
+      let(:pattern_trace) do
         instance_double(
-          RailsTracepointStack::Trace, 
-          file_path: 'some_path/ignore_pattern/some_file.rb'
+          RailsTracepointStack::Trace,
+          file_path: "some_path/ignore_pattern/some_file.rb"
         )
       end
 
@@ -97,13 +97,13 @@ RSpec.describe RailsTracepointStack::TraceFilter do
 
         allow(RailsTracepointStack::Filter::RbConfig)
           .to receive(:ruby_lib_path)
-          .and_return('/path/to/ruby/lib')
+          .and_return("/path/to/ruby/lib")
       end
 
-      let(:pattern_trace) do 
+      let(:pattern_trace) do
         instance_double(
-          RailsTracepointStack::Trace, 
-          file_path: 'some_path/some_file.rb'
+          RailsTracepointStack::Trace,
+          file_path: "some_path/some_file.rb"
         )
       end
 
