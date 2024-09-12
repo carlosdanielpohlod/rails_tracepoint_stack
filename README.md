@@ -20,7 +20,7 @@ if you wanna enable it globally on your Rails app
 
 Global use:
 
-By using the global tracing, just configuring `RAILS_TRACEPOINT_STACK` as true, you can have a sample scenario and output as:
+By using the global tracing, just configuring `RAILS_TRACEPOINT_STACK_ENABLED` as true, you can have a sample scenario and output as:
 
 ```ruby
 module Foo
@@ -57,7 +57,7 @@ called: Foo#puts_message in COMPLETE_PATH_TO_YOUR_FILE/app/services/foo:METHOD_L
 ```
 **Enabling Locally with .enable_trace**
 
-You can also enable the tracer locally (even with `RAILS_TRACEPOINT_STACK` not defined) by passing a block of code to be traced:
+You can also enable the tracer locally (even with `RAILS_TRACEPOINT_STACK_ENABLED` not defined) by passing a block of code to be traced:
 
 ```ruby
 class Bar
