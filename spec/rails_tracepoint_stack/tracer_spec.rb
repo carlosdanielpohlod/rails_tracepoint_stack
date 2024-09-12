@@ -63,7 +63,7 @@ RSpec.describe RailsTracepointStack::Tracer do
     end
 
     it "does not call logger" do
-      tracer.tracer.enable do
+      tracer.enable do
         Foo.new.dummy_method
       end
 
@@ -91,7 +91,7 @@ RSpec.describe RailsTracepointStack::Tracer do
     end
 
     it 'does not call logger' do
-      tracer.tracer.enable do
+      tracer.enable do
         Foo.new.dummy_method
       end
 
@@ -119,7 +119,7 @@ RSpec.describe RailsTracepointStack::Tracer do
     end
 
     it 'calls logger' do
-      tracer.tracer.enable do
+      tracer.enable do
         Foo.new.dummy_method
       end
 
@@ -147,7 +147,7 @@ RSpec.describe RailsTracepointStack::Tracer do
     end
 
     it 'does not call logger' do
-      tracer.tracer.enable do
+      tracer.enable do
         Foo.new.dummy_method
       end
 
@@ -179,7 +179,7 @@ RSpec.describe RailsTracepointStack::Tracer do
     end
 
     it "calls logger" do
-      tracer.tracer.enable do
+      tracer.enable do
         Foo.new.dummy_method
       end
 
