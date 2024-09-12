@@ -20,7 +20,7 @@ module RailsTracepointStack
   def self.enable_trace
     raise ArgumentError, "Block not given to #enable_trace" unless block_given?
 
-    tracer = RailsTracepointStack::Tracer.new.tracer
+    tracer = RailsTracepointStack::Tracer.new
     tracer.enable
     yield
   ensure
@@ -29,7 +29,7 @@ module RailsTracepointStack
 end
 
 if ENV.fetch("RAILS_TRACEPOINT_STACK_ENABLED", "false") == "true"
-  $rails_tracer_rtps = RailsTracepointStack::Tracer.new.tracer
+  $rails_tracer_rtps = RailsTracepointStack::Tracer.new
   $rails_tracer_rtps.enable
 
   at_exit do

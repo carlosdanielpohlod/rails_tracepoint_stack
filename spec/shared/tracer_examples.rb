@@ -1,7 +1,7 @@
 RSpec.shared_examples "tracer success examples asserts" do
   context "when log format is text" do
     it 'calls logger with correct log' do
-      tracer.tracer.enable do
+      tracer.enable do
         Foo.new.dummy_method
       end
 
@@ -19,7 +19,7 @@ RSpec.shared_examples "tracer success examples asserts" do
     end
     # TODO: Extract this test to a proper place
     it 'calls logger with correct log with json log format' do
-      tracer.tracer.enable do
+      tracer.enable do
         Foo.new.dummy_method
       end
 

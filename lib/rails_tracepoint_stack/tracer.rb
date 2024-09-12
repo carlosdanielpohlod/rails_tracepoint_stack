@@ -7,8 +7,17 @@ require "rails_tracepoint_stack/log_formatter"
 module RailsTracepointStack
   class Tracer
     include RailsTracepointStack::TraceFilter
-    # TODO: Tracer.new shoud return the tracer. Is weird to call Tracer.new.tracer
-    def tracer
+    extend Forwardable
+ 
+    def_delegators :@tracer, :enable, :disable
+
+    def initialize
+      generate_tracer
+    end
+
+    private
+
+    def generate_tracer
       @tracer ||= TracePoint.new(:call) do |tracepoint|
         trace = RailsTracepointStack::Trace.new(trace_point: tracepoint)
 
