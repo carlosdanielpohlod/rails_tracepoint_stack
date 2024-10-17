@@ -17,7 +17,7 @@ module RailsTracepointStack
       private
 
       def compute_duration!
-        File.open("log-boot-4.txt", "r").each_line do |line|
+        File.open("time_log.json", "r").each_line do |line|
           data = JSON.parse(line)
         
           file = data["file"]

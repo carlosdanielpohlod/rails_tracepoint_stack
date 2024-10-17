@@ -1,7 +1,8 @@
+require 'json'
 
 module RailsTracepointStack
-  module TmpSave
-    def self.save(trace:, last_time:)
+  class TmpSave
+    def self.save(trace:, current_time:, last_time:)
       duration = current_time - last_time
       log_obj = {
         time: current_time,
@@ -11,6 +12,7 @@ module RailsTracepointStack
         line: trace.line_number,
         duration: duration
       }
+      p log_obj
       File.open("time_log.json", "a") do |file|
         file.puts log_obj.to_json
       end
