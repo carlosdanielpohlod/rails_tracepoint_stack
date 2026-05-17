@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.5
+
+**BugFix**
+
+- Sanitize traced params before formatting so JSON logging does not overflow on recursive or problematic objects [Issue #37](https://github.com/carlosdanielpohlod/rails_tracepoint_stack/issues/37)
+- Stabilize text log param rendering across Ruby versions
+
 ## 0.3.4
 
 **Changes**

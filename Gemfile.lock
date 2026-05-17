@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rails_tracepoint_stack (0.3.4)
+    rails_tracepoint_stack (0.3.5)
 
 GEM
   remote: https://rubygems.org/
