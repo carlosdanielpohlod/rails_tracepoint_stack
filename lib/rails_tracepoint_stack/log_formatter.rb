@@ -44,7 +44,7 @@ module RailsTracepointStack
       when Hash
         safe_hash(value, ancestry)
       else
-        safe_object_string(value)
+        safe_json_object(value)
       end
     rescue SystemStackError, StandardError => error
       inspect_fallback(value, error)
@@ -66,13 +66,13 @@ module RailsTracepointStack
 
       ancestry[object_id] = true
       value.each_with_object({}) do |(key, item), result|
-        result[safe_hash_key(key)] = safe_value(item, ancestry)
+        result[safe_hash_key(key, ancestry)] = safe_value(item, ancestry)
       end
     ensure
       ancestry.delete(object_id)
     end
 
-    def self.safe_hash_key(key)
+    def self.safe_hash_key(key, ancestry = {})
       case key
       when String
         key
@@ -81,8 +81,43 @@ module RailsTracepointStack
       when true, false, nil
         key.inspect
       else
-        safe_object_string(key)
+        stringify_hash_key(key, ancestry)
       end
+    end
+
+    def self.safe_json_object(value)
+      json_value = JSON.parse(JSON.generate(value))
+
+      return json_value unless default_string_representation?(value, json_value)
+
+      safe_object_string(value)
+    rescue SystemStackError, StandardError
+      safe_object_string(value)
+    end
+
+    def self.default_string_representation?(value, json_value)
+      json_value.is_a?(String) &&
+        value.method(:to_s).owner == Kernel &&
+        json_value == value.to_s
+    rescue SystemStackError, StandardError
+      false
+    end
+
+    def self.stringify_hash_key(key, ancestry)
+      normalized_key = safe_value(key, ancestry)
+
+      case normalized_key
+      when String
+        normalized_key
+      when nil
+        "null"
+      when true, false, Numeric
+        normalized_key.to_s
+      else
+        JSON.generate(normalized_key)
+      end
+    rescue SystemStackError, StandardError
+      safe_object_string(key)
     end
 
     def self.safe_object_string(value)
@@ -137,7 +172,7 @@ module RailsTracepointStack
 
       ancestry[object_id] = true
       pairs = value.map do |key, item|
-        "#{text_hash_key(key)}=>#{text_value(item, ancestry)}"
+        "#{text_hash_key(key, ancestry)}=>#{text_value(item, ancestry)}"
       end
 
       "{#{pairs.join(", ")}}"
@@ -145,14 +180,14 @@ module RailsTracepointStack
       ancestry.delete(object_id)
     end
 
-    def self.text_hash_key(key)
+    def self.text_hash_key(key, ancestry = {})
       case key
       when Symbol
         ":#{key}"
       when String
         key.inspect
       else
-        text_value(key)
+        text_value(key, ancestry)
       end
     end
   end
