@@ -65,5 +65,40 @@ RSpec.describe RailsTracepointStack::LogFormatter do
 
       expect(described_class.json(trace_double)).to eq(expected_json)
     end
+
+    it "serializes recursive params without blowing the stack" do
+      recursive_payload = {}
+      recursive_payload[:self] = recursive_payload
+
+      allow(trace_double)
+        .to receive(:params)
+        .and_return({payload: recursive_payload})
+
+      parsed_json = JSON.parse(described_class.json(trace_double))
+
+      expect(parsed_json.fetch("params")).to eq(
+        "payload" => {
+          "self" => "[recursive Hash]"
+        }
+      )
+    end
+
+    it "falls back when a param inspect raises SystemStackError" do
+      exploding_object = Class.new do
+        def inspect
+          raise SystemStackError, "stack level too deep"
+        end
+      end.new
+
+      allow(trace_double)
+        .to receive(:params)
+        .and_return({payload: exploding_object})
+
+      parsed_json = JSON.parse(described_class.json(trace_double))
+
+      expect(parsed_json.fetch("params")).to eq(
+        "payload" => "#<#{exploding_object.class} unserializable: SystemStackError: stack level too deep>"
+      )
+    end
   end
 end
