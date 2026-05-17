@@ -12,7 +12,7 @@ module RailsTracepointStack
     end
 
     def self.text(trace)
-      "called: #{trace.class_name}##{trace.method_name} in #{trace.file_path}:#{trace.line_number} with params: #{trace.params}"
+      "called: #{trace.class_name}##{trace.method_name} in #{trace.file_path}:#{trace.line_number} with params: #{text_value(trace.params)}"
     end
 
     def self.json(trace)
@@ -98,6 +98,62 @@ module RailsTracepointStack
 
     def self.recursive_placeholder(value)
       "[recursive #{value.class}]"
+    end
+
+    def self.text_value(value, ancestry = {})
+      case value
+      when nil
+        "nil"
+      when true, false, Numeric
+        value.to_s
+      when String
+        value.inspect
+      when Symbol
+        ":#{value}"
+      when Array
+        text_array(value, ancestry)
+      when Hash
+        text_hash(value, ancestry)
+      else
+        safe_object_string(value)
+      end
+    rescue SystemStackError, StandardError => error
+      inspect_fallback(value, error)
+    end
+
+    def self.text_array(value, ancestry)
+      object_id = value.__id__
+      return recursive_placeholder(value) if ancestry.key?(object_id)
+
+      ancestry[object_id] = true
+      "[#{value.map { |item| text_value(item, ancestry) }.join(", ")}]"
+    ensure
+      ancestry.delete(object_id)
+    end
+
+    def self.text_hash(value, ancestry)
+      object_id = value.__id__
+      return recursive_placeholder(value) if ancestry.key?(object_id)
+
+      ancestry[object_id] = true
+      pairs = value.map do |key, item|
+        "#{text_hash_key(key)}=>#{text_value(item, ancestry)}"
+      end
+
+      "{#{pairs.join(", ")}}"
+    ensure
+      ancestry.delete(object_id)
+    end
+
+    def self.text_hash_key(key)
+      case key
+      when Symbol
+        ":#{key}"
+      when String
+        key.inspect
+      else
+        text_value(key)
+      end
     end
   end
 end
