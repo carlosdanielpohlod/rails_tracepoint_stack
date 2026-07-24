@@ -3,7 +3,10 @@ require "tmpdir"
 
 RSpec.describe RailsTracepointStack::SkillInstaller do
   around do |example|
-    Dir.mktmpdir { |dir| @destination = dir; example.run }
+    Dir.mktmpdir { |dir|
+      @destination = dir
+      example.run
+    }
   end
 
   attr_reader :destination

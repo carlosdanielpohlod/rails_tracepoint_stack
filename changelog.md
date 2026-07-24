@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.4.0
+
+**Features**
+
+- `RailsTracepointStack.capture` traces a block and returns the traces in
+  memory, with no env var, log file or restart involved
+- Traces now carry return values and raised exceptions, not just calls and params
+- Each trace knows its call depth, so a session renders as a call tree
+- `session.to_tree`, `session.as_json` and `session.summary` render a capture
+- Captures are bounded by `max_depth`, `max_traces`, `max_string_length` and
+  `max_collection_size`, and report `truncated?` when a limit cut them short
+- Captures watch only the calling thread by default; `threads: :all` opts out
+- `rails g rails_tracepoint_stack:install` writes an agent skill into the app,
+  so AI coding agents know when and how to trace it
+
+**Changes**
+
+- The tracer writes to a sink; the default one keeps the previous logging
+  behaviour, so global tracing is unchanged
+- Serialized string values are frozen copies, so a snapshot no longer follows
+  later mutations of the traced object
+
 ## 0.3.5
 
 **BugFix**

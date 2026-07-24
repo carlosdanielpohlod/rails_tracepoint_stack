@@ -39,7 +39,10 @@ RSpec.describe "RailsTracepointStack.capture" do
       session = nil
 
       begin
-        RailsTracepointStack.capture { |current| session = current; TraceSubject.new.boom }
+        RailsTracepointStack.capture { |current|
+          session = current
+          TraceSubject.new.boom
+        }
       rescue ArgumentError
         nil
       end
@@ -51,7 +54,10 @@ RSpec.describe "RailsTracepointStack.capture" do
       session = nil
 
       begin
-        RailsTracepointStack.capture { |current| session = current; TraceSubject.new.boom }
+        RailsTracepointStack.capture { |current|
+          session = current
+          TraceSubject.new.boom
+        }
       rescue ArgumentError
         nil
       end

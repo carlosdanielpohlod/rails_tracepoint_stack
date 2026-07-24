@@ -34,11 +34,9 @@ RSpec.describe "session rendering" do
 
     it "renders a raise with its class and message" do
       failed = RailsTracepointStack.capture do
-        begin
-          TraceSubject.new.nested_boom
-        rescue ArgumentError
-          nil
-        end
+        TraceSubject.new.nested_boom
+      rescue ArgumentError
+        nil
       end
 
       expect(failed.to_tree).to include("!! ArgumentError: kaboom")

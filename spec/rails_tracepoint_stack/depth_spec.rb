@@ -41,11 +41,9 @@ RSpec.describe "trace depth" do
 
   it "reports the depth of the frame that raised" do
     session = RailsTracepointStack.capture do |_current|
-      begin
-        TraceSubject.new.nested_boom
-      rescue ArgumentError
-        nil
-      end
+      TraceSubject.new.nested_boom
+    rescue ArgumentError
+      nil
     end
 
     expect(depths_of(session, :raise)).to eq([[:boom, 1]])

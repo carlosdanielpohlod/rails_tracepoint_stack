@@ -1,4 +1,9 @@
-Dir[File.join(File.dirname(__FILE__), '../lib/**/*.rb')].sort.each { |file| require file }
+# Generators are excluded: they are only loadable inside a Rails app, and the
+# behaviour behind them lives in SkillInstaller, which is plain Ruby.
+Dir[File.join(File.dirname(__FILE__), '../lib/**/*.rb')]
+  .reject { |file| file.include?("/lib/generators/") }
+  .sort
+  .each { |file| require file }
 Dir[File.join(File.dirname(__FILE__), './shared/**/*.rb')].each { |f| require f }
 Dir[File.join(File.dirname(__FILE__), './support/**/*.rb')].each { |f| require f }
 
