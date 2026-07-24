@@ -17,9 +17,11 @@ Gem::Specification.new do |s|
   s.files = Dir.chdir(File.expand_path(__dir__)) do
     Dir["lib/**/*.{rb,md}"] + ["README.md", "changelog.md"]
   end
-  s.homepage = "https://github.com/carlosdanielpohlod/rails_tracepoint_stack/"
+  s.homepage = "https://carlosdanielpohlod.github.io/rails_tracepoint_stack/"
   s.license = "MIT"
-  s.metadata["documentation_uri"] = "https://github.com/carlosdanielpohlod/rails_tracepoint_stack/"
+  s.metadata["source_code_uri"] = "https://github.com/carlosdanielpohlod/rails_tracepoint_stack"
+  s.metadata["documentation_uri"] = "https://github.com/carlosdanielpohlod/rails_tracepoint_stack#readme"
+  s.metadata["bug_tracker_uri"] = "https://github.com/carlosdanielpohlod/rails_tracepoint_stack/issues"
   s.metadata["changelog_uri"] = "https://github.com/carlosdanielpohlod/rails_tracepoint_stack/blob/main/changelog.md"
 
   s.required_ruby_version = ">= 3.0"
