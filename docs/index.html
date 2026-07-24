@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>rails_tracepoint_stack — see what your Rails code actually did</title>
+<meta name="description" content="A runtime call tree for Rails: which of your methods ran, what arguments they got, what each returned, and where an exception started. Gems and the framework filtered out.">
+<meta property="og:title" content="rails_tracepoint_stack">
+<meta property="og:description" content="A runtime call tree for Rails. 4 lines that matter out of 13,869 the tracer saw.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌲</text></svg>">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; }
+
+:root {
+  --bg: #0d1117;
+  --bg-raised: #161b22;
+  --bg-sunken: #010409;
+  --line: #21262d;
+  --line-soft: #1c2128;
+  --ink: #e6edf3;
+  --ink-dim: #9198a1;
+  --ink-faint: #6e7681;
+  --accent: #7ee787;
+  --accent-deep: #3fb950;
+  --amber: #e3b341;
+  --red: #ff7b72;
+  --blue: #79c0ff;
+  --violet: #d2a8ff;
+  --shadow: 0 16px 48px -12px rgba(1, 4, 9, .8);
+  --radius: 12px;
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, "JetBrains Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #ffffff;
+    --bg-raised: #f6f8fa;
+    --bg-sunken: #0d1117;
+    --line: #d1d9e0;
+    --line-soft: #e4e8ed;
+    --ink: #1f2328;
+    --ink-dim: #59636e;
+    --ink-faint: #818b98;
+    --accent: #1a7f37;
+    --accent-deep: #1a7f37;
+    --amber: #9a6700;
+    --red: #cf222e;
+    --blue: #0550ae;
+    --violet: #8250df;
+    --shadow: 0 12px 36px -14px rgba(31, 35, 40, .28);
+  }
+}
+
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 17px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+.wrap { width: min(100% - 2.5rem, 62rem); margin-inline: auto; }
+.narrow { width: min(100% - 2.5rem, 48rem); margin-inline: auto; }
+
+/* ---------- nav ---------- */
+
+nav {
+  position: sticky; top: 0; z-index: 20;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line-soft);
+}
+nav .wrap { display: flex; align-items: center; gap: 1.5rem; height: 3.75rem; }
+.brand {
+  font-family: var(--mono); font-size: .9rem; font-weight: 600;
+  color: var(--ink); text-decoration: none; margin-right: auto;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.brand span { color: var(--accent); }
+nav a.navlink {
+  color: var(--ink-dim); text-decoration: none; font-size: .875rem;
+  white-space: nowrap; transition: color .15s;
+}
+nav a.navlink:hover { color: var(--ink); }
+@media (max-width: 40rem) { .nav-hide { display: none; } }
+
+/* ---------- hero ---------- */
+
+header { padding: clamp(3rem, 9vw, 6.5rem) 0 clamp(2rem, 5vw, 3.5rem); }
+
+.eyebrow {
+  display: inline-flex; align-items: center; gap: .5rem;
+  font-family: var(--mono); font-size: .75rem; letter-spacing: .04em;
+  text-transform: uppercase; color: var(--ink-dim);
+  border: 1px solid var(--line); border-radius: 999px;
+  padding: .3rem .8rem; margin-bottom: 1.5rem;
+}
+.dot { width: .4rem; height: .4rem; border-radius: 50%; background: var(--accent-deep); }
+
+h1 {
+  font-size: clamp(2.1rem, 6.2vw, 3.6rem);
+  line-height: 1.08; letter-spacing: -.03em; font-weight: 700;
+  max-width: 20ch;
+}
+h1 em { font-style: normal; color: var(--accent); }
+
+.lede {
+  margin-top: 1.35rem; font-size: clamp(1.05rem, 2.4vw, 1.25rem);
+  color: var(--ink-dim); max-width: 58ch;
+}
+
+.cta-row { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 2rem; }
+.btn {
+  display: inline-flex; align-items: center; gap: .5rem;
+  font-size: .925rem; font-weight: 550; text-decoration: none;
+  padding: .625rem 1.15rem; border-radius: 8px;
+  border: 1px solid var(--line); color: var(--ink);
+  transition: border-color .15s, background .15s, transform .1s;
+}
+.btn:hover { border-color: var(--ink-faint); background: var(--bg-raised); }
+.btn:active { transform: translateY(1px); }
+.btn.primary {
+  background: var(--accent-deep); border-color: var(--accent-deep); color: #fff;
+}
+.btn.primary:hover { filter: brightness(1.1); background: var(--accent-deep); }
+
+/* ---------- terminal ---------- */
+
+.term {
+  margin-top: 2.5rem;
+  background: var(--bg-sunken);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.term-bar {
+  display: flex; align-items: center; gap: .45rem;
+  padding: .7rem .9rem;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+  background: rgba(255,255,255,.02);
+}
+.term-bar i { width: .7rem; height: .7rem; border-radius: 50%; background: #30363d; }
+.term-bar i:nth-child(1) { background: #ff5f57; }
+.term-bar i:nth-child(2) { background: #febc2e; }
+.term-bar i:nth-child(3) { background: #28c840; }
+.term-title {
+  margin-left: .6rem; font-family: var(--mono); font-size: .75rem;
+  color: #6e7681; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.term pre {
+  margin: 0; padding: 1.1rem 1.25rem 1.35rem;
+  overflow-x: auto; font-family: var(--mono);
+  font-size: clamp(.72rem, 1.85vw, .82rem); line-height: 1.75;
+  color: #c9d1d9; tab-size: 2;
+}
+.term pre code { font: inherit; }
+
+/* tokens — fixed dark palette: the terminal stays dark in both themes */
+.c-cls  { color: #79c0ff; }
+.c-mth  { color: #d2a8ff; }
+.c-loc  { color: #6e7681; }
+.c-arg  { color: #a5d6ff; }
+.c-ret  { color: #7ee787; }
+.c-err  { color: #ff7b72; font-weight: 600; }
+.c-sum  { color: #6e7681; font-style: italic; }
+.c-cmd  { color: #e6edf3; }
+.c-cmt  { color: #6e7681; }
+.c-kw   { color: #ff7b72; }
+.c-str  { color: #a5d6ff; }
+.c-num  { color: #79c0ff; }
+.c-note { color: #e3b341; }
+.c-mark { color: #e3b341; font-weight: 600; }
+
+/* ---------- sections ---------- */
+
+section { padding: clamp(3rem, 7vw, 5rem) 0; border-top: 1px solid var(--line-soft); }
+section.plain { border-top: none; }
+
+h2 {
+  font-size: clamp(1.5rem, 3.6vw, 2.05rem);
+  letter-spacing: -.02em; line-height: 1.2; font-weight: 650;
+  max-width: 24ch;
+}
+h3 {
+  font-size: 1.05rem; font-weight: 600; letter-spacing: -.01em;
+  margin-bottom: .4rem;
+}
+.section-lede { margin-top: .9rem; color: var(--ink-dim); max-width: 62ch; }
+p + p { margin-top: 1rem; }
+.sub { color: var(--ink-dim); }
+
+/* ---------- comparison ---------- */
+
+/* A grid item defaults to min-width:auto and refuses to shrink below its
+   content, so a wide <pre> inside one pushes the whole page sideways. */
+.compare > *, .grid > *, .stats > *, .steps > *, .table-scroll { min-width: 0; }
+
+.compare { display: grid; gap: 1rem; margin-top: 2rem; grid-template-columns: 1fr; }
+@media (min-width: 46rem) { .compare { grid-template-columns: 1fr 1fr; } }
+.card {
+  border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 1.35rem 1.4rem; background: var(--bg-raised);
+}
+.card .tag {
+  font-family: var(--mono); font-size: .7rem; letter-spacing: .05em;
+  text-transform: uppercase; color: var(--ink-faint); display: block; margin-bottom: .6rem;
+}
+.card.bad { border-color: color-mix(in srgb, var(--red) 30%, var(--line)); }
+.card.good { border-color: color-mix(in srgb, var(--accent-deep) 34%, var(--line)); }
+.card.bad .tag { color: var(--red); }
+.card.good .tag { color: var(--accent-deep); }
+.card pre {
+  margin: 0; font-family: var(--mono); font-size: .78rem; line-height: 1.7;
+  overflow-x: auto; color: var(--ink-dim); max-width: 100%;
+}
+
+/* ---------- feature grid ---------- */
+
+.grid { display: grid; gap: 1rem; margin-top: 2.25rem; grid-template-columns: 1fr; }
+@media (min-width: 40rem) { .grid { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 60rem) { .grid.three { grid-template-columns: repeat(3, 1fr); } }
+.feat {
+  border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 1.4rem; background: var(--bg-raised);
+  transition: border-color .18s, transform .18s;
+}
+.feat:hover { border-color: var(--ink-faint); transform: translateY(-2px); }
+.feat .ico {
+  font-family: var(--mono); font-size: 1.05rem; color: var(--accent);
+  display: block; margin-bottom: .7rem;
+}
+.feat p { font-size: .925rem; color: var(--ink-dim); }
+
+/* ---------- table ---------- */
+
+.table-scroll { overflow-x: auto; margin-top: 1.75rem; border: 1px solid var(--line); border-radius: var(--radius); }
+table { border-collapse: collapse; width: 100%; font-size: .875rem; min-width: 34rem; }
+th, td { text-align: left; padding: .7rem .95rem; border-bottom: 1px solid var(--line-soft); }
+thead th { background: var(--bg-raised); font-weight: 600; font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-dim); }
+tbody tr:last-child td { border-bottom: none; }
+td:first-child, th:first-child { font-family: var(--mono); font-size: .82rem; color: var(--blue); white-space: nowrap; }
+td:nth-child(2) { font-family: var(--mono); font-size: .8rem; color: var(--ink-faint); white-space: nowrap; }
+td:last-child { color: var(--ink-dim); }
+
+/* ---------- steps ---------- */
+
+.steps { counter-reset: s; margin-top: 2rem; display: grid; gap: 1.5rem; }
+.step { counter-increment: s; position: relative; padding-left: 2.9rem; }
+.step::before {
+  content: counter(s);
+  position: absolute; left: 0; top: -.1rem;
+  width: 1.9rem; height: 1.9rem; border-radius: 50%;
+  display: grid; place-items: center;
+  font-family: var(--mono); font-size: .8rem; font-weight: 600;
+  color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent-deep) 40%, var(--line));
+  background: var(--bg-raised);
+}
+
+/* ---------- callout ---------- */
+
+.callout {
+  margin-top: 2rem; padding: 1.2rem 1.35rem;
+  border: 1px solid var(--line); border-left: 3px solid var(--amber);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background: var(--bg-raised); font-size: .93rem; color: var(--ink-dim);
+}
+.callout strong { color: var(--ink); font-weight: 600; }
+.callout + .callout { margin-top: 1rem; }
+
+/* ---------- stat strip ---------- */
+
+.stats { display: grid; gap: 1px; margin-top: 2.25rem; background: var(--line); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; grid-template-columns: 1fr; }
+@media (min-width: 34rem) { .stats { grid-template-columns: repeat(3, 1fr); } }
+.stat { background: var(--bg-raised); padding: 1.3rem 1.2rem; }
+.stat b { display: block; font-family: var(--mono); font-size: clamp(1.5rem, 4vw, 1.95rem); font-weight: 650; letter-spacing: -.02em; color: var(--ink); line-height: 1.15; }
+.stat span { display: block; margin-top: .3rem; font-size: .83rem; color: var(--ink-dim); }
+
+/* ---------- inline code ---------- */
+
+code.inline {
+  font-family: var(--mono); font-size: .875em;
+  background: var(--bg-raised); border: 1px solid var(--line-soft);
+  padding: .1em .38em; border-radius: 5px; color: var(--ink);
+  word-break: break-word;
+}
+
+/* ---------- footer ---------- */
+
+footer { border-top: 1px solid var(--line-soft); padding: 2.5rem 0 3.5rem; }
+.foot-row { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: center; }
+footer a { color: var(--ink-dim); text-decoration: none; font-size: .875rem; }
+footer a:hover { color: var(--ink); text-decoration: underline; }
+.foot-note { margin-top: 1.25rem; font-size: .8rem; color: var(--ink-faint); }
+a { color: var(--blue); }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .feat:hover { transform: none; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="#top">rails_tracepoint<span>_stack</span></a>
+    <a class="navlink nav-hide" href="#what">What it shows</a>
+    <a class="navlink nav-hide" href="#request">A real request</a>
+    <a class="navlink nav-hide" href="#agents">For agents</a>
+    <a class="navlink" href="https://github.com/carlosdanielpohlod/rails_tracepoint_stack">GitHub</a>
+  </div>
+</nav>
+
+<header id="top">
+  <div class="wrap">
+    <div class="eyebrow"><span class="dot"></span> Ruby gem · v0.4.0 · MIT</div>
+    <h1>See what your Rails code <em>actually did</em>.</h1>
+    <p class="lede">
+      A runtime call tree of your own methods — the arguments they got, what each
+      one returned, and where an exception started. Gems, the framework and stdlib
+      are filtered out, so what is left is the part you wrote.
+    </p>
+    <div class="cta-row">
+      <a class="btn primary" href="#install">Get started</a>
+      <a class="btn" href="https://github.com/carlosdanielpohlod/rails_tracepoint_stack">Source on GitHub</a>
+      <a class="btn" href="https://rubygems.org/gems/rails_tracepoint_stack">RubyGems</a>
+    </div>
+
+    <div class="term">
+      <div class="term-bar">
+        <i></i><i></i><i></i>
+        <span class="term-title">bin/rails runner</span>
+      </div>
+<pre><code><span class="c-cmt"># Which method turned a 200.00 order into nil?</span>
+<span class="c-cls">session</span> = <span class="c-cls">RailsTracepointStack</span>.<span class="c-mth">capture</span>(max_depth: <span class="c-num">4</span>) { order.<span class="c-mth">total</span> }
+<span class="c-mth">puts</span> session.<span class="c-mth">to_tree</span>
+
+<span class="c-cls">Order</span>#<span class="c-mth">total</span> <span class="c-loc">(app/models/order.rb:88)</span> {}
+  <span class="c-cls">Order</span>#<span class="c-mth">subtotal</span> <span class="c-loc">(app/models/order.rb:95)</span> {}
+    <span class="c-ret">-&gt; 200.0</span>
+  <span class="c-cls">Order</span>#<span class="c-mth">apply_discount</span> <span class="c-loc">(app/models/order.rb:102)</span> <span class="c-arg">{"amount":200.0}</span>
+    <span class="c-cls">Discount</span>#<span class="c-mth">rate_for</span> <span class="c-loc">(app/models/discount.rb:12)</span> <span class="c-arg">{"order":"#&lt;Order id: 42&gt;"}</span>
+      <span class="c-ret">-&gt; null</span>          <span class="c-mark">&lt;- there it is</span>
+    <span class="c-err">!! TypeError: nil can't be coerced into Float</span>
+<span class="c-sum">4 calls, 3 returns, 1 raise, 2 classes</span></code></pre>
+    </div>
+  </div>
+</header>
+
+<section id="what">
+  <div class="wrap">
+    <h2>Logs tell you a method ran. This tells you what it did.</h2>
+    <p class="section-lede">
+      The gem has always been able to list the methods your app called. The
+      questions that actually come up while debugging are the next two, and those
+      are what a call tree answers.
+    </p>
+
+    <div class="compare">
+      <div class="card bad">
+        <span class="tag">What a log line gives you</span>
+<pre>called: Order#apply_discount in
+  /very/long/path/app/models/order.rb:102
+  with params: {amount=&gt;200.0}</pre>
+        <p class="sub" style="margin-top:1rem;font-size:.9rem">
+          It ran. With that argument. Nothing about what came back, nothing about
+          what it called, nothing about where the error started.
+        </p>
+      </div>
+      <div class="card good">
+        <span class="tag">What a capture gives you</span>
+<pre>Order#apply_discount (app/models/order.rb:102) {"amount":200.0}
+  Discount#rate_for (app/models/discount.rb:12) {"order":…}
+    -&gt; null
+  !! TypeError: nil can't be coerced into Float</pre>
+        <p class="sub" style="margin-top:1rem;font-size:.9rem">
+          Nesting shows who called whom. <code class="inline">-&gt;</code> is the
+          return value. <code class="inline">!!</code> is where it blew up.
+        </p>
+      </div>
+    </div>
+
+    <div class="grid three">
+      <div class="feat">
+        <span class="ico">-&gt;</span>
+        <h3>Return values</h3>
+        <p>Every method's result, right under the call. The nil you are hunting is
+        usually visible without adding a single line of code.</p>
+      </div>
+      <div class="feat">
+        <span class="ico">!!</span>
+        <h3>Where a raise started</h3>
+        <p>The exception is tagged on the frame that raised it, inside your own
+        code, without the forty frames of framework a backtrace hands you.</p>
+      </div>
+      <div class="feat">
+        <span class="ico">├─</span>
+        <h3>Real call depth</h3>
+        <p>Indentation is app-level nesting, derived from the real stack, so
+        framework frames in between never inflate the tree.</p>
+      </div>
+      <div class="feat">
+        <span class="ico">⌁</span>
+        <h3>Bounded by default</h3>
+        <p>Depth, trace count, string length and collection size are all capped,
+        and the session tells you when a cap cut it short.</p>
+      </div>
+      <div class="feat">
+        <span class="ico">≡</span>
+        <h3>Thread-scoped</h3>
+        <p>A capture watches only the calling thread, so it stays clean under
+        Puma instead of interleaving other requests.</p>
+      </div>
+      <div class="feat">
+        <span class="ico">{}</span>
+        <h3>Structured too</h3>
+        <p><code class="inline">as_json</code> gives the same data as records,
+        and <code class="inline">summary</code> gives the counts alone.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="request">
+  <div class="wrap">
+    <h2>A whole Rails request, in nine lines.</h2>
+    <p class="section-lede">
+      Traced against a real Rails 8.1 app on Ruby 4.0 — a full HTTP request
+      through the router, the controller and the views. The tracer saw 13,869
+      method calls. Four of them were written by a human on that project.
+    </p>
+
+    <div class="term">
+      <div class="term-bar">
+        <i></i><i></i><i></i>
+        <span class="term-title">GET / — capture(max_depth: 6)</span>
+      </div>
+<pre><code><span class="c-cls">RealEstateAgenciesController</span>#<span class="c-mth">index</span> <span class="c-loc">(app/controllers/real_estate_agencies_controller.rb:14)</span> {}
+  <span class="c-cls">IpLocation</span>.<span class="c-mth">guess_state_uf_and_city_name</span> <span class="c-loc">(app/services/ip_location.rb:15)</span> <span class="c-arg">{"ip":"127.0.0.1"}</span>
+    <span class="c-ret">-&gt; [null,null]</span>
+  <span class="c-ret">-&gt; null</span>
+<span class="c-mth">render</span> <span class="c-loc">app/views/real_estate_agencies/index.html.erb</span> {}
+  <span class="c-ret">-&gt; "&lt;!-- BEGIN app/views/real_estate_agencies/index.html.erb\n--&gt;… (2507 chars)"</span>
+<span class="c-mth">render</span> <span class="c-loc">app/views/layouts/application.html.erb</span> {}
+  <span class="c-ret">-&gt; "&lt;!-- BEGIN app/views/layouts/application.html.erb\n--&gt;&lt;!DOCTY… (5553 chars)"</span>
+<span class="c-sum">4 calls, 4 returns, 0 raises, 3 classes</span></code></pre>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><b>13,869</b><span>method calls the tracer saw</span></div>
+      <div class="stat"><b>4</b><span>kept as your app's code</span></div>
+      <div class="stat"><b>9</b><span>lines to read the whole request</span></div>
+    </div>
+
+    <div class="callout">
+      <strong>An empty tree is an answer, not a failure.</strong>
+      A bare <code class="inline">City.includes(:state).map(&amp;:name)</code> calls
+      no method anyone on the project wrote — <code class="inline">name</code> is
+      generated by ActiveRecord. So the capture says so, along with how much it
+      dropped, instead of leaving you staring at a blank result:
+      <div class="term" style="margin-top:1rem">
+<pre><code><span class="c-sum">0 calls, 0 returns, 0 raises, 0 classes</span>
+<span class="c-note">no app code ran: 34025 traces from gems, the framework and Ruby itself were filtered out</span></code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="install">
+  <div class="wrap">
+    <h2>Three lines to your first trace.</h2>
+
+    <div class="steps narrow" style="margin-inline:0">
+      <div class="step">
+        <h3>Add the gem</h3>
+        <div class="term" style="margin-top:.85rem">
+<pre><code><span class="c-cmt"># Gemfile</span>
+<span class="c-mth">gem</span> <span class="c-str">"rails_tracepoint_stack"</span></code></pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <h3>Wrap the code you are suspicious of</h3>
+        <div class="term" style="margin-top:.85rem">
+          <div class="term-bar"><i></i><i></i><i></i><span class="term-title">bin/rails runner</span></div>
+<pre><code>session = <span class="c-cls">RailsTracepointStack</span>.<span class="c-mth">capture</span>(max_depth: <span class="c-num">4</span>) <span class="c-kw">do</span>
+  <span class="c-cls">Order</span>.<span class="c-mth">find</span>(<span class="c-num">42</span>).<span class="c-mth">recalculate!</span>
+<span class="c-kw">end</span>
+
+<span class="c-mth">puts</span> session.<span class="c-mth">to_tree</span></code></pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <h3>Read the tree</h3>
+        <p class="sub" style="font-size:.95rem">
+          Indentation is call depth. <code class="inline">-&gt;</code> is a return
+          value. <code class="inline">!!</code> is a raise.
+          <code class="inline">render app/views/…</code> is a template with its
+          locals. The last line is the summary.
+        </p>
+      </div>
+    </div>
+
+    <h3 style="margin-top:2.75rem;font-size:1.15rem">Everything a session carries</h3>
+    <div class="term" style="margin-top:1rem">
+<pre><code>session.<span class="c-mth">to_tree</span>          <span class="c-cmt"># the indented call tree</span>
+session.<span class="c-mth">as_json</span>          <span class="c-cmt"># the same data, structured, one entry per trace</span>
+session.<span class="c-mth">summary</span>          <span class="c-cmt"># {calls:, returns:, raises:, classes:, filtered:, truncated:}</span>
+session.<span class="c-mth">result</span>           <span class="c-cmt"># what the block itself returned</span>
+session.<span class="c-mth">error</span>            <span class="c-cmt"># the exception that escaped, if any</span>
+session.<span class="c-mth">traces</span>           <span class="c-cmt"># the raw records</span>
+session.<span class="c-mth">filtered_count</span>   <span class="c-cmt"># how much the filters dropped</span></code></pre>
+    </div>
+
+    <div class="callout" style="border-left-color: var(--blue)">
+      <strong>When the block raises</strong>, <code class="inline">capture</code>
+      re-raises it. Take the session from the block argument to keep the traces:
+      <div class="term" style="margin-top:1rem">
+<pre><code>session = <span class="c-kw">nil</span>
+<span class="c-kw">begin</span>
+  <span class="c-cls">RailsTracepointStack</span>.<span class="c-mth">capture</span> { |s| session = s; thing_that_blows_up }
+<span class="c-kw">rescue</span> =&gt; error
+  <span class="c-mth">puts</span> session.<span class="c-mth">to_tree</span>
+<span class="c-kw">end</span></code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="limits">
+  <div class="wrap">
+    <h2>Sized for a context window, not for a disk.</h2>
+    <p class="section-lede">
+      A real request produces tens of thousands of traces. Every capture is
+      bounded, and every bound is a keyword argument.
+    </p>
+
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>Option</th><th>Default</th><th>What it does</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>max_depth</td><td>none</td><td>Drops traces nested deeper than this</td></tr>
+          <tr><td>max_traces</td><td>5000</td><td>Stops collecting; <code class="inline">truncated?</code> becomes true</td></tr>
+          <tr><td>max_string_length</td><td>200</td><td>Shortens long strings, keeping the original length</td></tr>
+          <tr><td>max_collection_size</td><td>20</td><td>Shortens long arrays and hashes</td></tr>
+          <tr><td>capture_params</td><td>true</td><td>Set false to show only the flow</td></tr>
+          <tr><td>capture_return</td><td>true</td><td>Set false to show only the calls</td></tr>
+          <tr><td>threads</td><td>:current</td><td><code class="inline">:all</code> also records background threads</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="margin-top:1.75rem" class="sub">
+      To narrow by file instead, set patterns once and every capture respects them:
+    </p>
+    <div class="term" style="margin-top:1rem">
+<pre><code><span class="c-cmt"># config/initializers/rails_tracepoint_stack.rb</span>
+<span class="c-cls">RailsTracepointStack</span>.<span class="c-mth">configure</span> <span class="c-kw">do</span> |config|
+  config.file_path_to_filter_patterns &lt;&lt; <span class="c-str">%r{app/services/}</span>
+  config.ignore_patterns &lt;&lt; <span class="c-str">%r{app/models/concerns/}</span>
+<span class="c-kw">end</span></code></pre>
+    </div>
+  </div>
+</section>
+
+<section id="agents">
+  <div class="wrap">
+    <h2>Your AI agent reaches for <code class="inline" style="font-size:.7em">puts</code> because it does not know this exists.</h2>
+    <p class="section-lede">
+      One command writes a skill into your app describing when tracing beats
+      reading code, how to keep the output inside a context window, and how to
+      read the tree. After that the agent picks the gem on its own.
+    </p>
+
+    <div class="term" style="margin-top:1.75rem">
+      <div class="term-bar"><i></i><i></i><i></i><span class="term-title">your app</span></div>
+<pre><code><span class="c-cmd">$</span> bin/rails generate rails_tracepoint_stack:install
+
+      <span class="c-ret">create</span>  .claude/skills/debug-with-tracepoint/SKILL.md</code></pre>
+    </div>
+
+    <div class="grid" style="margin-top:1.5rem">
+      <div class="feat">
+        <span class="ico">◇</span>
+        <h3>Bounded output by construction</h3>
+        <p>The skill leads with the limit arguments, so an agent caps the capture
+        before it floods its own context with a whole request.</p>
+      </div>
+      <div class="feat">
+        <span class="ico">◈</span>
+        <h3>Honest about the edges</h3>
+        <p>It says when a <code class="inline">binding.irb</code> is the cheaper
+        tool, and that an empty tree means the code ran inside gems — not that
+        the tool broke.</p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <strong>No Rails dependency.</strong> The generator is a thin wrapper over a
+      plain Ruby installer, so the gem still ships without pulling Rails in. Not
+      using Claude Code? The file is ordinary Markdown — point whatever you use at
+      <code class="inline">.claude/skills/debug-with-tracepoint/SKILL.md</code>.
+    </div>
+  </div>
+</section>
+
+<section id="notes">
+  <div class="wrap">
+    <h2>What it costs, and what it misses.</h2>
+    <p class="section-lede">
+      TracePoint is not free and the filters are not magic. Both are worth knowing
+      before you reach for it.
+    </p>
+
+    <div class="grid">
+      <div class="feat">
+        <span class="ico">◔</span>
+        <h3>Around 8x slower while tracing</h3>
+        <p>Measured on a real Rails request: 11ms became 88ms. Fine for an
+        investigation, wrong for anything left running in production.</p>
+      </div>
+      <div class="feat">
+        <span class="ico">◌</span>
+        <h3>Blocks do not appear</h3>
+        <p>Ruby emits a different event for blocks and the gem subscribes to
+        method calls only. Logic living inside a block is invisible for now.</p>
+      </div>
+      <div class="feat">
+        <span class="ico">◑</span>
+        <h3>Generated methods are not yours</h3>
+        <p>ActiveRecord attribute readers, associations and scopes are written by
+        the framework, so they are filtered out like any other gem code.</p>
+      </div>
+      <div class="feat">
+        <span class="ico">◍</span>
+        <h3>A raise still returns</h3>
+        <p>Ruby fires a return event while unwinding, so a
+        <code class="inline">-&gt; null</code> directly under a
+        <code class="inline">!!</code> is the frame unwinding, not a nil result.</p>
+      </div>
+    </div>
+
+    <div class="callout" style="border-left-color: var(--ink-faint)">
+      Prefer to trace something you cannot wrap in a block — boot, a rake task, a
+      request handled by a running server? Set
+      <code class="inline">RAILS_TRACEPOINT_STACK_ENABLED=true</code> and the
+      tracer runs for the whole process, writing to
+      <code class="inline">log/rails_tracepoint_stack.log</code> in text or JSON.
+    </div>
+  </div>
+</section>
+
+<section class="plain" style="border-top:1px solid var(--line-soft)">
+  <div class="wrap" style="text-align:center">
+    <h2 style="max-width:none;margin-inline:auto">Stop adding <code class="inline" style="font-size:.7em">puts</code> to find out what returned nil.</h2>
+    <div class="cta-row" style="justify-content:center;margin-top:1.75rem">
+      <a class="btn primary" href="https://rubygems.org/gems/rails_tracepoint_stack">Install the gem</a>
+      <a class="btn" href="https://github.com/carlosdanielpohlod/rails_tracepoint_stack#readme">Read the docs</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-row">
+      <a href="https://github.com/carlosdanielpohlod/rails_tracepoint_stack">GitHub</a>
+      <a href="https://rubygems.org/gems/rails_tracepoint_stack">RubyGems</a>
+      <a href="https://github.com/carlosdanielpohlod/rails_tracepoint_stack/blob/main/changelog.md">Changelog</a>
+      <a href="https://github.com/carlosdanielpohlod/rails_tracepoint_stack/issues">Issues</a>
+      <span style="color:var(--ink-faint);font-size:.875rem">MIT licensed</span>
+    </div>
+    <p class="foot-note">
+      Built by <a href="https://github.com/carlosdanielpohlod">Carlos Daniel Pohlod</a>.
+      Requires Ruby 3.0 or newer. Every trace on this page is real output, not a mockup.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>
