@@ -15,9 +15,13 @@ module RailsTracepointStack
 
     def_delegators :@tracer, :enable, :disable
 
-    def initialize(sink: RailsTracepointStack::Sink::Log.new, events: DEFAULT_EVENTS)
+    # A nil thread watches every thread in the process, which is what the
+    # global tracer wants. Passing one confines tracing to it, so a capture
+    # running inside a threaded server does not pick up other requests.
+    def initialize(sink: RailsTracepointStack::Sink::Log.new, events: DEFAULT_EVENTS, thread: nil)
       @sink = sink
       @events = events
+      @thread = thread
       generate_tracer
     end
 
@@ -25,6 +29,8 @@ module RailsTracepointStack
 
     def generate_tracer
       @tracer ||= TracePoint.new(*@events) do |tracepoint|
+        next if out_of_scope_thread?
+
         trace = RailsTracepointStack::Trace.new(trace_point: tracepoint)
 
         next if ignore_trace?(trace: trace)
@@ -32,6 +38,10 @@ module RailsTracepointStack
         trace.depth = depth_for(trace)
         @sink.record(trace)
       end
+    end
+
+    def out_of_scope_thread?
+      !@thread.nil? && Thread.current != @thread
     end
 
     # Only kept traces pay for reading the stack position, so the cost stays

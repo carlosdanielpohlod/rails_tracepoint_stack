@@ -23,12 +23,16 @@ module RailsTracepointStack
 
   # Traces a block and hands back everything that happened inside it, instead
   # of writing to a log. Meant to be run as a one-off: capture, read, done.
-  def self.capture
+  def self.capture(threads: :current)
     raise ArgumentError, "Block not given to #capture" unless block_given?
 
     collector = RailsTracepointStack::Sink::Collector.new
     session = collector.session
-    tracer = RailsTracepointStack::Tracer.new(sink: collector, events: CAPTURE_EVENTS)
+    tracer = RailsTracepointStack::Tracer.new(
+      sink: collector,
+      events: CAPTURE_EVENTS,
+      thread: (threads == :all) ? nil : Thread.current
+    )
 
     tracer.enable
     begin
