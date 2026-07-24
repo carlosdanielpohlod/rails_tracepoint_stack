@@ -3,26 +3,20 @@ require_relative "lib/rails_tracepoint_stack/version"
 Gem::Specification.new do |s|
   s.name = "rails_tracepoint_stack"
   s.version = RailsTracepointStack::VERSION
-  s.summary = "Get a complete stack trace for your code on a Rails application."
-  s.description = "A formatted output of all methods called in your rails application of code created by the developer, with the complete path to the class/module, including passed params."
+  s.summary = "Runtime call tree for a Rails app: which methods ran, with what params, and what they returned."
+  s.description = "Traces a block of your Rails app and returns the call tree of your own code - " \
+    "arguments, return values, raised exceptions and call depth - with gems, the framework and " \
+    "stdlib filtered out. Bounded output meant to be read directly, by a developer or by an AI " \
+    "coding agent debugging the app."
   s.authors = ["Carlos Daniel Pohlod"]
   s.email = "carlospohlod@gmail.com"
-  s.files = [
-    "lib/rails_tracepoint_stack.rb",
-    "lib/rails_tracepoint_stack/configuration.rb",
-    "lib/rails_tracepoint_stack/log_formatter.rb",
-    "lib/rails_tracepoint_stack/logger.rb",
-    "lib/rails_tracepoint_stack/trace_filter.rb",
-    "lib/rails_tracepoint_stack/tracer.rb",
-    "lib/rails_tracepoint_stack/version.rb",
-    "lib/rails_tracepoint_stack/trace.rb",
-    "lib/rails_tracepoint_stack/filter/gem_path.rb",
-    "lib/rails_tracepoint_stack/filter/rb_config.rb",
-    "lib/rails_tracepoint_stack/filter/custom_trace_selector_filter.rb",
-    "lib/rails_tracepoint_stack/filter/trace_from_dependencies_filter.rb",
-    "lib/rails_tracepoint_stack/filter/trace_from_ruby_code_filter.rb",
-    "lib/rails_tracepoint_stack/filter/trace_to_ignore_filter.rb",
-  ]
+  # Globbed rather than listed: the packaged agent skill is a .md file under
+  # lib, and an omission there breaks the installer only at runtime. Globbed
+  # from the gemspec's own directory, since the glob would otherwise follow
+  # whatever directory `gem build` happened to be run from.
+  s.files = Dir.chdir(File.expand_path(__dir__)) do
+    Dir["lib/**/*.{rb,md}"] + ["README.md", "changelog.md"]
+  end
   s.homepage = "https://github.com/carlosdanielpohlod/rails_tracepoint_stack/"
   s.license = "MIT"
   s.metadata["documentation_uri"] = "https://github.com/carlosdanielpohlod/rails_tracepoint_stack/"

@@ -1,5 +1,41 @@
 # Changelog
 
+## 0.4.0
+
+**Features**
+
+- `RailsTracepointStack.capture` traces a block and returns the traces in
+  memory, with no env var, log file or restart involved
+- Traces now carry return values and raised exceptions, not just calls and params
+- Each trace knows its call depth, so a session renders as a call tree
+- `session.to_tree`, `session.as_json` and `session.summary` render a capture
+- Captures are bounded by `max_depth`, `max_traces`, `max_string_length` and
+  `max_collection_size`, and report `truncated?` when a limit cut them short
+- Captures watch only the calling thread by default; `threads: :all` opts out
+- `rails g rails_tracepoint_stack:install` writes an agent skill into the app,
+  so AI coding agents know when and how to trace it
+
+**BugFix**
+
+- Params reported every local the method body declared, not just the arguments
+  it received, so unassigned locals showed up as arguments passed as nil.
+  `TracePoint#parameters` now decides what is read from the binding
+- `GemPath` referenced `Bundler` without requiring it, raising `NameError` on
+  the first trace outside a bundle
+- A raise coming out of a C method landed one level too deep in the tree
+
+**Changes**
+
+- The tracer writes to a sink; the default one keeps the previous logging
+  behaviour, so global tracing is unchanged
+- Class methods render as `Foo.bar` rather than `#<Class:Foo>#bar`
+- Compiled templates render as `render app/views/…` with their locals, instead
+  of the generated method name and the rendering internals
+- An empty capture reports how many traces the filters dropped, so "nothing
+  ran" is distinguishable from "nothing of yours ran"
+- Serialized string values are frozen copies, so a snapshot no longer follows
+  later mutations of the traced object
+
 ## 0.3.5
 
 **BugFix**

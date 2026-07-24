@@ -35,8 +35,12 @@ module RailsTracepointStack
 
     def self.safe_value(value, ancestry = {})
       case value
-      when nil, true, false, Numeric, String
+      when nil, true, false, Numeric
         value
+      when String
+        # Callers may keep the result around after the traced code moved on,
+        # so a live reference to a mutable string would drift.
+        value.frozen? ? value : value.dup.freeze
       when Symbol
         value.to_s
       when Array
