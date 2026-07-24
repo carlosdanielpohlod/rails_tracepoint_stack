@@ -15,8 +15,26 @@ module RailsTracepointStack
       @trace_point = trace_point
     end
 
+    def kind
+      trace_point.event
+    end
+
     def params
+      return {} unless kind == :call
+
       @params ||= fetch_params(trace_point)
+    end
+
+    def return_value
+      return nil unless kind == :return
+
+      trace_point.return_value
+    end
+
+    def exception
+      return nil unless kind == :raise
+
+      trace_point.raised_exception
     end
 
     private

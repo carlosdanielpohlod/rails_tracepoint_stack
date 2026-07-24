@@ -1,5 +1,6 @@
 Dir[File.join(File.dirname(__FILE__), '../lib/**/*.rb')].sort.each { |file| require file }
 Dir[File.join(File.dirname(__FILE__), './shared/**/*.rb')].each { |f| require f }
+Dir[File.join(File.dirname(__FILE__), './support/**/*.rb')].each { |f| require f }
 
 def initialize_gem_configuration!
   RailsTracepointStack.configuration = RailsTracepointStack::Configuration.new
