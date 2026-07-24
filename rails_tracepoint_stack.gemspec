@@ -11,8 +11,12 @@ Gem::Specification.new do |s|
   s.authors = ["Carlos Daniel Pohlod"]
   s.email = "carlospohlod@gmail.com"
   # Globbed rather than listed: the packaged agent skill is a .md file under
-  # lib, and an omission there breaks the installer only at runtime.
-  s.files = Dir["lib/**/*.{rb,md}"] + ["README.md", "changelog.md"]
+  # lib, and an omission there breaks the installer only at runtime. Globbed
+  # from the gemspec's own directory, since the glob would otherwise follow
+  # whatever directory `gem build` happened to be run from.
+  s.files = Dir.chdir(File.expand_path(__dir__)) do
+    Dir["lib/**/*.{rb,md}"] + ["README.md", "changelog.md"]
+  end
   s.homepage = "https://github.com/carlosdanielpohlod/rails_tracepoint_stack/"
   s.license = "MIT"
   s.metadata["documentation_uri"] = "https://github.com/carlosdanielpohlod/rails_tracepoint_stack/"

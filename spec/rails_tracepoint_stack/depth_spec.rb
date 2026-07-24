@@ -49,6 +49,29 @@ RSpec.describe "trace depth" do
     expect(depths_of(session, :raise)).to eq([[:boom, 1]])
   end
 
+  # The raise reports Float#* as its frame, deeper than any frame being
+  # tracked, so it has to land at the depth of the app method that called it
+  # rather than one level further in.
+  it "attributes a raise from a C method to the depth of its app caller" do
+    session = RailsTracepointStack.capture do
+      TraceSubject.new.coerce_failure
+    rescue TypeError
+      nil
+    end
+
+    expect(depths_of(session, :raise).map(&:last)).to eq([0])
+  end
+
+  it "recovers the depth when a frame is abandoned without ever returning" do
+    session = RailsTracepointStack.capture do
+      fiber = Fiber.new { TraceSubject.new.suspended }
+      fiber.resume
+      TraceSubject.new.add(1, 2)
+    end
+
+    expect(depths_of(session, :call)).to include([:add, 0])
+  end
+
   it "recovers the depth after an exception unwinds frames" do
     session = RailsTracepointStack.capture do
       begin

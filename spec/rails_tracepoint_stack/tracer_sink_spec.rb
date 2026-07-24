@@ -30,6 +30,29 @@ RSpec.describe RailsTracepointStack::Tracer do
     end
   end
 
+  describe "depth when returns are not watched" do
+    # This is how the global tracer runs: it only ever sees :call, so nothing
+    # ever pops a frame off the back of a return event.
+    it "keeps sibling calls at the same depth" do
+      tracer = described_class.new(sink: sink, events: [:call])
+
+      tracer.enable do
+        5.times { TraceSubject.new.add(1, 2) }
+      end
+
+      expect(sink.records.map(&:depth)).to all(eq(0))
+    end
+
+    it "still nests a call made inside another one" do
+      tracer = described_class.new(sink: sink, events: [:call])
+
+      tracer.enable { TraceSubject.new.nested(3) }
+
+      expect(sink.records.map { |record| [record.method_name, record.depth] })
+        .to eq([[:nested, 0], [:doubled, 1]])
+    end
+  end
+
   describe "watched events" do
     it "does not watch returns by default" do
       tracer = described_class.new(sink: sink)
@@ -51,11 +74,9 @@ RSpec.describe RailsTracepointStack::Tracer do
       tracer = described_class.new(sink: sink, events: [:call, :raise])
 
       tracer.enable do
-        begin
-          TraceSubject.new.boom
-        rescue ArgumentError
-          nil
-        end
+        TraceSubject.new.boom
+      rescue ArgumentError
+        nil
       end
 
       expect(sink.kinds_for(:boom)).to eq([:call, :raise])

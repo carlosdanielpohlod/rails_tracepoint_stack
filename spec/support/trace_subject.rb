@@ -9,6 +9,12 @@ class TraceSubject
     raise ArgumentError, "kaboom"
   end
 
+  # Raises from inside a C method rather than from Ruby code, so the raise
+  # event reports a stack position deeper than this frame's own.
+  def coerce_failure
+    1.0 * nil
+  end
+
   def nested(value)
     doubled(value) + 1
   end
@@ -29,6 +35,11 @@ class TraceSubject
     nil
   end
 
+  # Suspends and is never resumed, so this frame never fires a :return.
+  def suspended
+    Fiber.yield
+  end
+
   def deep(level)
     return level if level <= 0
 
@@ -36,7 +47,7 @@ class TraceSubject
   end
 end
 
-TraceEntry = Struct.new(:kind, :params, :return_value, :exception, :method_name)
+TraceEntry = Struct.new(:kind, :params, :return_value, :exception, :method_name, :depth)
 
 # Collects whatever the tracer hands it, so specs can assert on real traces
 # instead of on a mock's expectations.
@@ -51,7 +62,7 @@ class RecordingSink
     return unless trace.class_name == TraceSubject
 
     @records << TraceEntry.new(
-      trace.kind, trace.params, trace.return_value, trace.exception, trace.method_name
+      trace.kind, trace.params, trace.return_value, trace.exception, trace.method_name, trace.depth
     )
   end
 
