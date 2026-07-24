@@ -2,6 +2,7 @@ require 'rails_tracepoint_stack/configuration'
 require 'rails_tracepoint_stack/log_formatter'
 require 'rails_tracepoint_stack/tracer'
 require 'rails_tracepoint_stack/limits'
+require 'rails_tracepoint_stack/skill_installer'
 require 'rails_tracepoint_stack/sink/collector'
 require 'rails_tracepoint_stack/trace_session'
 
