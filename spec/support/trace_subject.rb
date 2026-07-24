@@ -1,6 +1,10 @@
 # Real classes exercised by the tracer specs. Traces are matched by
 # `defined_class`, so these must live outside the spec files that use them.
 class TraceSubject
+  def self.build(value)
+    new
+  end
+
   def add(first, second)
     first + second
   end
@@ -33,6 +37,17 @@ class TraceSubject
 
   def nothing
     nil
+  end
+
+  # The locals below are declared but unassigned when the call event fires.
+  def with_locals(given)
+    doubled = given * 2
+    labelled = "n=#{doubled}"
+    labelled.upcase
+  end
+
+  def with_optionals(first, second = 2, *rest, key: nil, **options)
+    [first, second, rest, key, options]
   end
 
   # Suspends and is never resumed, so this frame never fires a :return.

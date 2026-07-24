@@ -7,12 +7,13 @@ module RailsTracepointStack
   # produced.
   class TraceSession
     attr_reader :traces
-    attr_accessor :result, :error
+    attr_accessor :result, :error, :filtered_count
     attr_writer :truncated
 
     def initialize
       @traces = []
       @truncated = false
+      @filtered_count = 0
     end
 
     def add(record)

@@ -48,6 +48,57 @@ RSpec.describe "session rendering" do
       expect(capped.to_tree).to include("truncated")
     end
 
+    it "renders a class method with dot notation instead of its singleton class" do
+      class_method = RailsTracepointStack.capture { TraceSubject.build(1) }
+
+      expect(class_method.to_tree).to start_with("TraceSubject.build (")
+    end
+
+    it "leaves an anonymous singleton class alone instead of printing its address" do
+      record = RailsTracepointStack::TraceRecord.new(
+        kind: :call, class_name: "#<Class:0x00007f1234>", method_name: :whatever,
+        file_path: "app/thing.rb", line_number: 3, params: {}, depth: 0
+      )
+
+      expect(RailsTracepointStack::Renderer::Tree.line_for(record))
+        .to start_with("#<Class:0x00007f1234>#whatever ")
+    end
+
+    describe "compiled templates" do
+      def template_record(params)
+        RailsTracepointStack::TraceRecord.new(
+          kind: :call,
+          class_name: "#<Class:0x00007f1234>",
+          method_name: :_app_views_orders_index_html_erb___123_456,
+          file_path: "#{Dir.pwd}/app/views/orders/index.html.erb",
+          line_number: 0,
+          params: params,
+          depth: 1
+        )
+      end
+
+      it "renders the template path instead of the compiled method name" do
+        line = RailsTracepointStack::Renderer::Tree.line_for(template_record({}))
+
+        expect(line).to eq("  render app/views/orders/index.html.erb {}")
+      end
+
+      it "keeps the locals a partial was given" do
+        line = RailsTracepointStack::Renderer::Tree
+          .line_for(template_record({"local_assigns" => {"order" => 42}}))
+
+        expect(line).to end_with(%({"order":42}))
+      end
+
+      it "drops the rendering internals that are not the developer's data" do
+        line = RailsTracepointStack::Renderer::Tree.line_for(
+          template_record({"local_assigns" => {}, "output_buffer" => "", "_" => "#<Proc>"})
+        )
+
+        expect(line).not_to include("output_buffer")
+      end
+    end
+
     it "ends with a summary line" do
       expect(lines.last).to eq("2 calls, 2 returns, 0 raises, 1 class")
     end
@@ -55,7 +106,7 @@ RSpec.describe "session rendering" do
 
   describe "#summary" do
     it "counts the events and the distinct classes" do
-      expect(session.summary).to eq(
+      expect(session.summary).to include(
         calls: 2, returns: 2, raises: 0, classes: 1, truncated: false
       )
     end

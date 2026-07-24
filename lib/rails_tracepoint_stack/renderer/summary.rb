@@ -9,6 +9,7 @@ module RailsTracepointStack
           returns: count(session, :return),
           raises: count(session, :raise),
           classes: session.traces.map(&:class_name).uniq.size,
+          filtered: session.filtered_count,
           truncated: session.truncated?
         }
       end

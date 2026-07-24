@@ -15,6 +15,11 @@ module RailsTracepointStack
 
     def_delegators :@tracer, :enable, :disable
 
+    # How many traces the filters dropped. A capture that keeps nothing is
+    # ambiguous on its own: this tells the difference between code that never
+    # ran and code that ran entirely inside gems.
+    attr_reader :filtered_count
+
     # A nil thread watches every thread in the process, which is what the
     # global tracer wants. Passing one confines tracing to it, so a capture
     # running inside a threaded server does not pick up other requests.
@@ -22,6 +27,7 @@ module RailsTracepointStack
       @sink = sink
       @events = events
       @thread = thread
+      @filtered_count = 0
       generate_tracer
     end
 
@@ -33,7 +39,10 @@ module RailsTracepointStack
 
         trace = RailsTracepointStack::Trace.new(trace_point: tracepoint)
 
-        next if ignore_trace?(trace: trace)
+        if ignore_trace?(trace: trace)
+          @filtered_count += 1
+          next
+        end
 
         trace.depth = depth_for(trace)
         @sink.record(trace)

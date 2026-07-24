@@ -8,13 +8,14 @@ RSpec.describe RailsTracepointStack::Trace do
       method_id: :my_method,
       path: "/path/to/file.rb",
       lineno: 42,
+      parameters: [[:req, :var]],
       binding: instance_double(
         "Binding",
-        local_variables: ["var"],
+        local_variables: [:var],
         local_variable_get: "value"
       ))
   end
-  let(:params) { {"var" => "value"} }
+  let(:params) { {var: "value"} }
   subject(:trace) { described_class.new(trace_point: trace_point_double) }
 
   describe "#initialize" do
@@ -95,6 +96,42 @@ RSpec.describe RailsTracepointStack::Trace do
       entry = entry_for(:call, :add) { TraceSubject.new.add(1, 2) }
 
       expect(entry.exception).to be_nil
+    end
+  end
+
+  describe "params" do
+    def params_for(method_name, &block)
+      collected = nil
+      tracepoint = TracePoint.new(:call) do |trace_point|
+        next unless trace_point.defined_class == TraceSubject
+        next unless trace_point.method_id == method_name
+
+        collected = described_class.new(trace_point: trace_point).params
+      end
+      tracepoint.enable(&block)
+      collected
+    end
+
+    it "reports the arguments the method received" do
+      params = params_for(:with_locals) { TraceSubject.new.with_locals(3) }
+
+      expect(params).to eq({given: 3})
+    end
+
+    it "leaves out locals that are only declared inside the body" do
+      params = params_for(:with_locals) { TraceSubject.new.with_locals(3) }
+
+      expect(params.keys).not_to include(:doubled, :labelled)
+    end
+
+    it "covers optional, splat and keyword arguments" do
+      params = params_for(:with_optionals) do
+        TraceSubject.new.with_optionals(1, 2, 3, 4, key: 5, other: 6)
+      end
+
+      expect(params).to eq({
+        first: 1, second: 2, rest: [3, 4], key: 5, options: {other: 6}
+      })
     end
   end
 end

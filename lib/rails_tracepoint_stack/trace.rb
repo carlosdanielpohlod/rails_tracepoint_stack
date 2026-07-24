@@ -40,10 +40,18 @@ module RailsTracepointStack
 
     private
 
+    # Every local the method body declares is already in scope at :call time,
+    # holding nil. Reading the whole binding would report those as arguments
+    # the caller passed as nil, so the parameter list decides what to read.
     def fetch_params(trace_point)
-      trace_point.binding.local_variables.map { |var|
-        [var, trace_point.binding.local_variable_get(var)]
-      }.to_h
+      binding = trace_point.binding
+      declared = binding.local_variables
+
+      trace_point.parameters.each_with_object({}) do |(_type, name), params|
+        next if name.nil? || !declared.include?(name)
+
+        params[name] = binding.local_variable_get(name)
+      end
     end
   end
 end

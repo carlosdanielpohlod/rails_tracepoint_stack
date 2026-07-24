@@ -46,6 +46,7 @@ module RailsTracepointStack
       raise
     ensure
       tracer.disable
+      session.filtered_count = tracer.filtered_count
     end
 
     session
