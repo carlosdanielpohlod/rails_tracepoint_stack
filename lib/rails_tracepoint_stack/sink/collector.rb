@@ -31,7 +31,8 @@ module RailsTracepointStack
           params: RailsTracepointStack::LogFormatter.safe_value(trace.params),
           return_value: RailsTracepointStack::LogFormatter.safe_value(trace.return_value),
           exception_class: exception && exception.class.to_s,
-          exception_message: exception && RailsTracepointStack::LogFormatter.stringify(exception.message)
+          exception_message: exception && RailsTracepointStack::LogFormatter.stringify(exception.message),
+          depth: trace.depth || 0
         )
       end
     end

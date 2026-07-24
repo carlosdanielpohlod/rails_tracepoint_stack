@@ -12,6 +12,7 @@ module RailsTracepointStack
     :return_value,
     :exception_class,
     :exception_message,
+    :depth,
     keyword_init: true
   ) do
     def call?

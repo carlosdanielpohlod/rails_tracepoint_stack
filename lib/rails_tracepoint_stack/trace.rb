@@ -5,6 +5,7 @@ module RailsTracepointStack
     extend Forwardable
 
     attr_reader :params, :trace_point
+    attr_accessor :depth
 
     def_delegator :@trace_point, :defined_class, :class_name
     def_delegator :@trace_point, :method_id, :method_name
