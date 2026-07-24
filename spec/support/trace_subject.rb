@@ -23,3 +23,25 @@ class TraceSubject
 end
 
 TraceEntry = Struct.new(:kind, :params, :return_value, :exception, :method_name)
+
+# Collects whatever the tracer hands it, so specs can assert on real traces
+# instead of on a mock's expectations.
+class RecordingSink
+  attr_reader :records
+
+  def initialize
+    @records = []
+  end
+
+  def record(trace)
+    return unless trace.class_name == TraceSubject
+
+    @records << TraceEntry.new(
+      trace.kind, trace.params, trace.return_value, trace.exception, trace.method_name
+    )
+  end
+
+  def kinds_for(method_name)
+    records.select { |record| record.method_name == method_name }.map(&:kind)
+  end
+end
