@@ -25,6 +25,10 @@ class TraceSubject
     value
   end
 
+  def nothing
+    nil
+  end
+
   def deep(level)
     return level if level <= 0
 

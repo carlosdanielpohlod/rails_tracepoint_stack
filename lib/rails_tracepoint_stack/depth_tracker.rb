@@ -1,15 +1,15 @@
 module RailsTracepointStack
   # Turns raw stack positions into app-level nesting.
   #
-  # Two things make this less obvious than counting :call and :return events.
-  # Most frames between two traced methods belong to gems and get filtered out,
-  # so counting every event would indent app code by the depth of the framework
-  # underneath it. And a method that exits through an exception never fires a
-  # :return, so an event counter would drift for the rest of the session.
+  # Counting :call and :return events would not work here. Most frames between
+  # two traced methods belong to gems and get filtered out, so an event counter
+  # would indent app code by the depth of the framework underneath it. It would
+  # also drift permanently on any event the tracer does not see: tracing that
+  # starts partway up a stack, or a frame left behind by a non-local exit.
   #
-  # Both go away by reading the real stack position of each kept trace: any
-  # frame recorded at an equal or deeper position has necessarily finished,
-  # however it finished, so it gets dropped.
+  # Reading the real stack position of each kept trace avoids both. A frame
+  # recorded at an equal or deeper position has necessarily finished, however
+  # it finished, so it gets dropped.
   class DepthTracker
     def initialize
       @stack = []
