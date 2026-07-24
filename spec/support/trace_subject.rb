@@ -20,6 +20,16 @@ class TraceSubject
   def nested_boom
     boom
   end
+
+  def echo(value)
+    value
+  end
+
+  def deep(level)
+    return level if level <= 0
+
+    deep(level - 1)
+  end
 end
 
 TraceEntry = Struct.new(:kind, :params, :return_value, :exception, :method_name)

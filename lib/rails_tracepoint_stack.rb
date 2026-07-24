@@ -1,6 +1,7 @@
 require 'rails_tracepoint_stack/configuration'
 require 'rails_tracepoint_stack/log_formatter'
 require 'rails_tracepoint_stack/tracer'
+require 'rails_tracepoint_stack/limits'
 require 'rails_tracepoint_stack/sink/collector'
 require 'rails_tracepoint_stack/trace_session'
 
@@ -23,10 +24,12 @@ module RailsTracepointStack
 
   # Traces a block and hands back everything that happened inside it, instead
   # of writing to a log. Meant to be run as a one-off: capture, read, done.
-  def self.capture(threads: :current)
+  def self.capture(threads: :current, **limit_options)
     raise ArgumentError, "Block not given to #capture" unless block_given?
 
-    collector = RailsTracepointStack::Sink::Collector.new
+    collector = RailsTracepointStack::Sink::Collector.new(
+      limits: RailsTracepointStack::Limits.new(**limit_options)
+    )
     session = collector.session
     tracer = RailsTracepointStack::Tracer.new(
       sink: collector,
