@@ -1,6 +1,8 @@
 require 'rails_tracepoint_stack/configuration'
 require 'rails_tracepoint_stack/log_formatter'
 require 'rails_tracepoint_stack/tracer'
+require 'rails_tracepoint_stack/sink/collector'
+require 'rails_tracepoint_stack/trace_session'
 
 $rails_tracer_rtps = nil
 
@@ -15,6 +17,30 @@ module RailsTracepointStack
 
   def self.configure
     yield(configuration)
+  end
+
+  CAPTURE_EVENTS = [:call, :return, :raise].freeze
+
+  # Traces a block and hands back everything that happened inside it, instead
+  # of writing to a log. Meant to be run as a one-off: capture, read, done.
+  def self.capture
+    raise ArgumentError, "Block not given to #capture" unless block_given?
+
+    collector = RailsTracepointStack::Sink::Collector.new
+    session = collector.session
+    tracer = RailsTracepointStack::Tracer.new(sink: collector, events: CAPTURE_EVENTS)
+
+    tracer.enable
+    begin
+      session.result = yield(session)
+    rescue Exception => error
+      session.error = error
+      raise
+    ensure
+      tracer.disable
+    end
+
+    session
   end
 
   def self.enable_trace
