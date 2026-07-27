@@ -25,12 +25,34 @@ module RailsTracepointStack
       )
     end
 
+    REPLACEMENT = "�".freeze
+
     def self.stringify(value)
       return nil if value.nil?
 
-      value.to_s
+      utf8(value.to_s)
     rescue SystemStackError, StandardError => error
       inspect_fallback(value, error)
+    end
+
+    # Traced code holds bytes that are not text: a file read in binary mode, a
+    # digest, a response body. Left as they are, those strings poison every
+    # consumer downstream - JSON refuses to encode them, and joining them with
+    # the rest of the output raises Encoding::CompatibilityError. Normalizing
+    # here keeps the damage to the one value that caused it.
+    def self.utf8(value)
+      return value unless value.is_a?(String)
+
+      converted =
+        if value.encoding == Encoding::UTF_8
+          value
+        else
+          value.encode(Encoding::UTF_8, invalid: :replace, undef: :replace, replace: REPLACEMENT)
+        end
+
+      converted.valid_encoding? ? converted : converted.scrub(REPLACEMENT)
+    rescue SystemStackError, StandardError
+      value.scrub(REPLACEMENT)
     end
 
     def self.safe_value(value, ancestry = {})
@@ -40,7 +62,7 @@ module RailsTracepointStack
       when String
         # Callers may keep the result around after the traced code moved on,
         # so a live reference to a mutable string would drift.
-        value.frozen? ? value : value.dup.freeze
+        utf8(value).dup.freeze
       when Symbol
         value.to_s
       when Array
@@ -125,7 +147,7 @@ module RailsTracepointStack
     end
 
     def self.safe_object_string(value)
-      value.inspect
+      utf8(value.inspect)
     rescue SystemStackError, StandardError => error
       inspect_fallback(value, error)
     end
@@ -146,7 +168,7 @@ module RailsTracepointStack
       when true, false, Numeric
         value.to_s
       when String
-        value.inspect
+        utf8(value).inspect
       when Symbol
         ":#{value}"
       when Array
