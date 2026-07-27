@@ -14,6 +14,8 @@ module RailsTracepointStack
       def initialize(session: RailsTracepointStack::TraceSession.new, limits: RailsTracepointStack::Limits.new)
         @session = session
         @limits = limits
+        @open_block = nil
+        @suppressed_returns = Hash.new(0)
       end
 
       def record(trace)
@@ -24,10 +26,47 @@ module RailsTracepointStack
           return
         end
 
-        session.add(build_record(trace))
+        built = build_record(trace)
+        return if collapsed?(built)
+
+        session.add(built)
       end
 
       private
+
+      # A block written inside a loop runs once per element and reports the
+      # same location every time, which buries the trace it belongs to. Runs of
+      # the same block at the same depth become one record carrying a count,
+      # and the matching returns are dropped with them.
+      def collapsed?(record)
+        return drop_suppressed_return(record) if record.block_return?
+        return break_run(record) unless record.block_call?
+
+        key = [record.file_path, record.line_number, record.depth]
+
+        if @open_block && @open_block.first == key
+          @open_block.last.repeats += 1
+          @suppressed_returns[record.depth] += 1
+          return true
+        end
+
+        @open_block = [key, record]
+        false
+      end
+
+      def drop_suppressed_return(record)
+        return false unless @suppressed_returns[record.depth] > 0
+
+        @suppressed_returns[record.depth] -= 1
+        true
+      end
+
+      # Anything that is not part of the block's own call/return pair ends the
+      # run, so two separate loops over the same line stay separate.
+      def break_run(record)
+        @open_block = nil unless record.returned?
+        false
+      end
 
       def build_record(trace)
         exception = trace.exception
@@ -42,7 +81,8 @@ module RailsTracepointStack
           return_value: return_value_for(trace),
           exception_class: exception && exception.class.to_s,
           exception_message: exception && RailsTracepointStack::LogFormatter.stringify(exception.message),
-          depth: trace.depth || 0
+          depth: trace.depth || 0,
+          repeats: 1
         )
       end
 

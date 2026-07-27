@@ -23,10 +23,20 @@ module RailsTracepointStack
     # A nil thread watches every thread in the process, which is what the
     # global tracer wants. Passing one confines tracing to it, so a capture
     # running inside a threaded server does not pick up other requests.
-    def initialize(sink: RailsTracepointStack::Sink::Log.new, events: DEFAULT_EVENTS, thread: nil)
+    # own_block is the block the caller wrapped around the code under
+    # inspection. It is the caller's own code, so it is skipped before a depth
+    # is assigned - otherwise it would indent the whole trace by a level it
+    # never shows.
+    def initialize(
+      sink: RailsTracepointStack::Sink::Log.new,
+      events: DEFAULT_EVENTS,
+      thread: nil,
+      own_block: nil
+    )
       @sink = sink
       @events = events
       @thread = thread
+      @own_block_location = own_block&.source_location
       @filtered_count = 0
       generate_tracer
     end
@@ -39,6 +49,8 @@ module RailsTracepointStack
 
         trace = RailsTracepointStack::Trace.new(trace_point: tracepoint)
 
+        next if own_block?(trace)
+
         if ignore_trace?(trace: trace)
           @filtered_count += 1
           next
@@ -47,6 +59,35 @@ module RailsTracepointStack
         trace.depth = depth_for(trace)
         @sink.record(trace)
       end
+    end
+
+    # Matching on location alone would also drop a block written on the same
+    # line as the capture call. The caller's block is the first to arrive from
+    # that location, so only that one is skipped, along with its return.
+    def own_block?(trace)
+      return false if @own_block_location.nil?
+
+      case trace.kind
+      when :b_call then claim_own_block(trace)
+      when :b_return then release_own_block(trace)
+      else false
+      end
+    end
+
+    def claim_own_block(trace)
+      return false if @own_block_seen
+      return false unless [trace.file_path, trace.line_number] == @own_block_location
+
+      @own_block_seen = true
+      @own_block_position = raw_stack_position
+      true
+    end
+
+    def release_own_block(trace)
+      return false unless @own_block_position && raw_stack_position == @own_block_position
+
+      @own_block_position = nil
+      true
     end
 
     def out_of_scope_thread?
@@ -61,8 +102,8 @@ module RailsTracepointStack
       raw_position = raw_stack_position
 
       case trace.kind
-      when :call then tracker.enter(raw_position)
-      when :return then tracker.leave(raw_position)
+      when :call, :b_call then tracker.enter(raw_position)
+      when :return, :b_return then tracker.leave(raw_position)
       when :raise then tracker.raised(raw_position)
       end
     end

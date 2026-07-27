@@ -1,8 +1,30 @@
 # Real classes exercised by the tracer specs. Traces are matched by
 # `defined_class`, so these must live outside the spec files that use them.
 class TraceSubject
+  # A Rails scope is a lambda held at class-body level: TracePoint reports it
+  # with no defining class and no method name.
+  SCOPE_LIKE = lambda { |factor| factor * 3 }
+
   def self.build(value)
     new
+  end
+
+  # The block runs once per element, all from the same line — the shape that
+  # floods a trace.
+  def repeated_block
+    [1, 2, 3, 4, 5].map { |number| number * 2 }
+  end
+
+  def runs_scope_like(factor)
+    SCOPE_LIKE.call(factor)
+  end
+
+  def yields_once
+    yield 7
+  end
+
+  def calls_a_block
+    yields_once { |value| value + 1 }
   end
 
   def add(first, second)
