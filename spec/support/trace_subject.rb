@@ -62,6 +62,23 @@ class TraceSubject
   end
 end
 
+# ActiveRecord makes a model's singleton class print its whole schema, and
+# leaves its `name` nil. This reproduces that shape without pulling in Rails.
+class NoisySingletonSubject
+  def self.build(value)
+    value * 2
+  end
+
+  def self.many_objects
+    Array.new(80) { |index| Struct.new(:a, :b, :c).new("x" * 120, index, "y" * 120) }
+  end
+end
+
+NoisySingletonSubject.singleton_class.define_singleton_method(:to_s) do
+  "#<Class:NoisySingletonSubject (call 'NoisySingletonSubject.load_schema' " \
+    "to load schema information)>"
+end
+
 TraceEntry = Struct.new(:kind, :params, :return_value, :exception, :method_name, :depth)
 
 # Collects whatever the tracer hands it, so specs can assert on real traces

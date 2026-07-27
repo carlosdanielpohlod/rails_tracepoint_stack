@@ -34,7 +34,7 @@ module RailsTracepointStack
 
         RailsTracepointStack::TraceRecord.new(
           kind: trace.kind,
-          class_name: RailsTracepointStack::LogFormatter.stringify(trace.class_name),
+          class_name: class_name_for(trace),
           method_name: trace.method_name,
           file_path: trace.file_path,
           line_number: trace.line_number,
@@ -44,6 +44,35 @@ module RailsTracepointStack
           exception_message: exception && RailsTracepointStack::LogFormatter.stringify(exception.message),
           depth: trace.depth || 0
         )
+      end
+
+      # `to_s` on a class is whatever that class decided to print. ActiveRecord
+      # makes a model's singleton class print its entire schema, which turns one
+      # method call into hundreds of characters of column definitions. A module
+      # knows its own name, so ask for that instead and only fall back to `to_s`
+      # for the anonymous ones that have none.
+      def class_name_for(trace)
+        klass = trace.class_name
+        return RailsTracepointStack::LogFormatter.stringify(klass) unless klass.is_a?(Module)
+
+        name = klass.name
+        return name if name
+
+        attached = attached_module(klass)
+        return "#<Class:#{attached.name}>" if attached&.name
+
+        RailsTracepointStack::LogFormatter.stringify(klass)
+      end
+
+      # Singleton classes have no name of their own. Ruby 3.2 can hand back the
+      # object they belong to; older versions leave only the printed form.
+      def attached_module(klass)
+        return nil unless klass.respond_to?(:attached_object)
+
+        attached = klass.attached_object
+        attached.is_a?(Module) ? attached : nil
+      rescue SystemStackError, StandardError
+        nil
       end
 
       def params_for(trace)
@@ -59,7 +88,7 @@ module RailsTracepointStack
       end
 
       def snapshot(value)
-        RailsTracepointStack::Truncator.call(
+        RailsTracepointStack::Truncator.bounded(
           RailsTracepointStack::LogFormatter.safe_value(value),
           limits
         )

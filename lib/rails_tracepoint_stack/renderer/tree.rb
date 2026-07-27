@@ -37,7 +37,11 @@ module RailsTracepointStack
         end
       end
 
-      SINGLETON_CLASS = /\A#<Class:([A-Z][\w:]*)>\z/
+      # Stops at the first character that cannot be part of a constant name, so
+      # a singleton class that printed extra detail after its name still
+      # resolves. Requires a leading capital, which keeps anonymous singletons
+      # like #<Class:0x00007f1234> out.
+      SINGLETON_CLASS = /\A#<Class:([A-Z][\w:]*)[\s(>]/
       TEMPLATE_FILE = /\.(erb|haml|slim|builder|jbuilder|rabl)\z/i
       # Everything a template receives besides the locals belongs to the
       # rendering machinery, not to the developer.
