@@ -75,9 +75,29 @@ unbounded capture of a real request is tens of thousands of lines.
 | `max_traces:` | 5000 | Cap total lines |
 | `max_string_length:` | 200 | Keep big payloads readable |
 | `max_collection_size:` | 20 | Keep loaded associations readable |
+| `max_value_length:` | 1000 | Cap any single value, whatever its shape |
 | `capture_params: false` | on | Show only the flow |
 | `capture_return: false` | on | Show only the calls |
 | `threads: :all` | current only | Include background threads |
+| `blocks: true` | off | Also trace blocks — see below |
+
+### When a scope or lambda seems to do nothing
+
+A Rails scope is a lambda, not a method, so by default nothing inside it shows
+up — you see the call that used the scope and then its result, with no steps in
+between. Same for any `yield`ed block. Add `blocks: true`:
+
+```ruby
+RailsTracepointStack.capture(blocks: true) { News.latest(User.current) }
+```
+
+Blocks render as `Class#method { }`, or as `block { }` plus a location when the
+block has no enclosing method (which is what a scope looks like). A line like
+`↻ 40× ... { }` means that block ran 40 times from the same place — a predicate
+inside a loop — and only the first run's arguments were kept.
+
+Leave it off unless you need it. A block inside a loop fires once per element,
+so this costs far more traces than watching methods does.
 
 To narrow by file instead, set patterns before capturing:
 

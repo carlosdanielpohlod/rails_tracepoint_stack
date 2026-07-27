@@ -100,12 +100,42 @@ A real request produces tens of thousands of traces, so captures are bounded.
 | `max_traces` | 5000 | Stops collecting; `session.truncated?` becomes true |
 | `max_string_length` | 200 | Shortens long strings |
 | `max_collection_size` | 20 | Shortens long arrays and hashes |
+| `max_value_length` | 1000 | Replaces any single value larger than this with its size |
 | `capture_params` | `true` | Set false to show only the flow |
 | `capture_return` | `true` | Set false to show only the calls |
 | `threads` | `:current` | `:all` also records background threads |
+| `blocks` | `false` | `true` also traces blocks — see below |
 
 ```ruby
 RailsTracepointStack.capture(max_depth: 3, capture_return: false) { ... }
+```
+
+### Blocks and scopes
+
+A Rails scope is a lambda, so the logic inside it is not a method call and does
+not appear by default. `blocks: true` traces block entry and exit as well:
+
+```ruby
+RailsTracepointStack.capture(blocks: true) { News.latest(User.current) }
+```
+
+```
+News.latest (app/models/news.rb:88) {"user":"Anonymous"}
+  block { } (app/models/news.rb:46) {"user":"Anonymous"}
+    Project.allowed_to_condition (app/models/project.rb:189) {"permission":"view_news"}
+      ↻ 40× AccessControl.permission { } (lib/redmine/access_control.rb:37) {"p":"#<Permission …>"}
+        -> false
+```
+
+It is off by default because a block written inside a loop runs once per
+element: in Redmine, one call produced 48 block events and 43 of them came from
+a single `detect` predicate. Runs of the same block at the same depth collapse
+into one line with a `↻ N×` count, which keeps only the first run's arguments —
+if you need every iteration, leave blocks off and read the loop instead.
+
+Blocks are named after the method they were written in. A block with no
+enclosing method — a scope, a lambda held in a constant — has neither a class
+nor a method name to show, so it renders as `block { }` plus its location.
 ```
 
 ## Tracing the whole process
