@@ -36,7 +36,9 @@ module RailsTracepointStack
       @sink = sink
       @events = events
       @thread = thread
-      @own_block_location = own_block&.source_location
+      # Ruby has grown extra entries on source_location over time (columns, end
+      # positions), so only the file and the line are compared.
+      @own_block_location = own_block&.source_location&.first(2)
       @filtered_count = 0
       generate_tracer
     end
