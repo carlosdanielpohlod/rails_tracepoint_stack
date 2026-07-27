@@ -32,12 +32,39 @@ module RailsTracepointStack
       def self.line_for(record)
         case record.kind
         when :call then call_line(record)
-        when :return then return_line(record)
+        when :b_call then block_line(record)
+        when :return, :b_return then return_line(record)
         when :raise then raise_line(record)
         end
       end
 
-      SINGLETON_CLASS = /\A#<Class:([A-Z][\w:]*)>\z/
+      # A block has no name of its own. TracePoint reports the method it was
+      # written in, which is the useful label; a block written at class-body
+      # level - a scope, a lambda constant - has neither, so the location is
+      # all there is to show.
+      def self.block_line(record)
+        "#{indent(record.depth)}#{repeat_marker(record)}#{block_name(record)} { } " \
+          "(#{location(record)}) #{compact(record.params)}"
+      end
+
+      def self.block_name(record)
+        return "block" if record.class_name.nil? || record.method_name.nil?
+
+        qualified_name(record)
+      end
+
+      def self.repeat_marker(record)
+        count = record.repeats.to_i
+        return "" if count <= 1
+
+        "↻ #{count}× "
+      end
+
+      # Stops at the first character that cannot be part of a constant name, so
+      # a singleton class that printed extra detail after its name still
+      # resolves. Requires a leading capital, which keeps anonymous singletons
+      # like #<Class:0x00007f1234> out.
+      SINGLETON_CLASS = /\A#<Class:([A-Z][\w:]*)[\s(>]/
       TEMPLATE_FILE = /\.(erb|haml|slim|builder|jbuilder|rabl)\z/i
       # Everything a template receives besides the locals belongs to the
       # rendering machinery, not to the developer.

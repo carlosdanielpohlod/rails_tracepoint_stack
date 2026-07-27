@@ -6,11 +6,13 @@ module RailsTracepointStack
     DEFAULT_MAX_TRACES = 5_000
     DEFAULT_MAX_STRING_LENGTH = 200
     DEFAULT_MAX_COLLECTION_SIZE = 20
+    DEFAULT_MAX_VALUE_LENGTH = 1_000
 
     attr_reader :max_depth,
       :max_traces,
       :max_string_length,
       :max_collection_size,
+      :max_value_length,
       :capture_params,
       :capture_return
 
@@ -19,6 +21,7 @@ module RailsTracepointStack
       max_traces: DEFAULT_MAX_TRACES,
       max_string_length: DEFAULT_MAX_STRING_LENGTH,
       max_collection_size: DEFAULT_MAX_COLLECTION_SIZE,
+      max_value_length: DEFAULT_MAX_VALUE_LENGTH,
       capture_params: true,
       capture_return: true
     )
@@ -26,6 +29,7 @@ module RailsTracepointStack
       @max_traces = max_traces
       @max_string_length = max_string_length
       @max_collection_size = max_collection_size
+      @max_value_length = max_value_length
       @capture_params = capture_params
       @capture_return = capture_return
     end

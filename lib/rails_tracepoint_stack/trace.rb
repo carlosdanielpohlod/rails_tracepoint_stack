@@ -20,14 +20,17 @@ module RailsTracepointStack
       trace_point.event
     end
 
+    ENTERING = [:call, :b_call].freeze
+    LEAVING = [:return, :b_return].freeze
+
     def params
-      return {} unless kind == :call
+      return {} unless ENTERING.include?(kind)
 
       @params ||= fetch_params(trace_point)
     end
 
     def return_value
-      return nil unless kind == :return
+      return nil unless LEAVING.include?(kind)
 
       trace_point.return_value
     end

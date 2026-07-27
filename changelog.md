@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.5.0
+
+**Features**
+
+- `capture(blocks: true)` traces block entry and exit, which is what makes a
+  Rails scope, a lambda held in a constant, or any yielded block visible.
+  Off by default: a block inside a loop runs once per element. Runs of the
+  same block at the same depth collapse into one record with a `↻ N×` count
+- `max_value_length` (default 1000) caps any single value, whatever its shape
+
+**BugFix**
+
+- `to_tree` raised `Encoding::CompatibilityError` whenever a traced value held
+  bytes that are not text — a file read in binary mode, a digest, a response
+  body. Strings are now converted to UTF-8 with invalid bytes replaced
+- A class method on an ActiveRecord model rendered as its singleton class,
+  which prints the model's entire schema for a single call. The class name now
+  comes from the module's own name
+- Per-string and per-collection limits still let one value through at thousands
+  of characters, since twenty items truncated to two hundred each is four
+  thousand
+- The block handed to `capture` was traced as part of the result and consumed a
+  level of depth, indenting everything under it
+
 ## 0.4.0
 
 **Features**

@@ -22,11 +22,16 @@ module RailsTracepointStack
   end
 
   CAPTURE_EVENTS = [:call, :return, :raise].freeze
+  BLOCK_EVENTS = [:b_call, :b_return].freeze
 
   # Traces a block and hands back everything that happened inside it, instead
   # of writing to a log. Meant to be run as a one-off: capture, read, done.
-  def self.capture(threads: :current, **limit_options)
-    raise ArgumentError, "Block not given to #capture" unless block_given?
+  # Blocks are off by default: a block written inside a loop fires once per
+  # element, so watching them costs more traces than watching methods does.
+  # Turn them on to see scopes, lambdas and anything else whose logic lives in
+  # a block rather than a method.
+  def self.capture(threads: :current, blocks: false, **limit_options, &traced)
+    raise ArgumentError, "Block not given to #capture" unless traced
 
     collector = RailsTracepointStack::Sink::Collector.new(
       limits: RailsTracepointStack::Limits.new(**limit_options)
@@ -34,13 +39,14 @@ module RailsTracepointStack
     session = collector.session
     tracer = RailsTracepointStack::Tracer.new(
       sink: collector,
-      events: CAPTURE_EVENTS,
-      thread: (threads == :all) ? nil : Thread.current
+      events: blocks ? CAPTURE_EVENTS + BLOCK_EVENTS : CAPTURE_EVENTS,
+      thread: (threads == :all) ? nil : Thread.current,
+      own_block: traced
     )
 
     tracer.enable
     begin
-      session.result = yield(session)
+      session.result = traced.call(session)
     rescue Exception => error
       session.error = error
       raise
