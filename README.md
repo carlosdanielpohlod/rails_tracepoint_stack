@@ -2,7 +2,7 @@
 
 **[carlosdanielpohlod.github.io/rails_tracepoint_stack](https://carlosdanielpohlod.github.io/rails_tracepoint_stack/)**
 
-<img width="3840" height="2160" alt="image" src="https://github.com/user-attachments/assets/f86ed342-51b1-4acb-ab7a-92665b575776" />
+<img width="3840" height="2160" alt="image" src="https://github.com/user-attachments/assets/64ecec65-e0b9-4c18-a825-b2aad6a53a08" />
 
 See what your Rails code actually did at runtime: which of *your* methods ran,
 what arguments they got, what each one returned, and where an exception was
