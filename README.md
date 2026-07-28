@@ -2,6 +2,8 @@
 
 **[carlosdanielpohlod.github.io/rails_tracepoint_stack](https://carlosdanielpohlod.github.io/rails_tracepoint_stack/)**
 
+<img width="3840" height="2160" alt="image" src="https://github.com/user-attachments/assets/f86ed342-51b1-4acb-ab7a-92665b575776" />
+
 See what your Rails code actually did at runtime: which of *your* methods ran,
 what arguments they got, what each one returned, and where an exception was
 first raised — as a call tree, with gems, the framework and stdlib filtered out.
